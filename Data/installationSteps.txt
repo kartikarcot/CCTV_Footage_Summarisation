@@ -2,4 +2,4 @@ conda install -c conda-forge opencv
 conda install -c conda-forge x264=20131218 //installed this because of dlib x264 not found error
 conda install matplotlib
 conda install scikit-image
-testing
+
