@@ -2,7 +2,7 @@
 
 Papers related to CCTV video summarization and the key points to be noted from them.
 
-**1. CRAM: Compact Representation of Action in Movies** [Link](papers/cram.pdf)
+**1. CRAM: Compact Representation of Action in Movies** [Link](./papers/cram.pdf)
 
 * Identifies only events of interest such as running, pick up, opening trunk etc. to generate action-specific summaries
 * Clifford Fourier Transform (CFT)
