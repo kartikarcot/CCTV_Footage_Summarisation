@@ -9,6 +9,11 @@ Papers related to CCTV video summarization and the key points to be noted from t
 
 **2. Making a Long Video Short: Dynamic Video Synopsis** [Link](./papers/dynamic-video-synopsis.pdf)
 
+* Activity Detection
+    * Inout pixel is **labelled as active** if its colour varies from the temoporal median at that same pixel. The median filter reduced noise.
+
+    * **Energy Minimization:** \E(M) = Ea(M) + \alpha
+
 **3. Webcam Synopsis: Peeking Around the World** [Link](./papers/webcam-synopsis.pdf)
 
 **4. Non Chronological Video Synopsis and Indexing** [Link](./papers/nonchronological-video-synopsis.pdf)
