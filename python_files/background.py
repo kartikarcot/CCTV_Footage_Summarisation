@@ -1,58 +1,46 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture('DubRun.mp4')
+def create_background(video, buf_size):
+    """
+    Creates the background of clip using temporal median
 
-# Default resolutions of the frame are obtained.The default resolutions are system dependent.
-# We convert the resolutions from float to integer.
-frame_width = int(cap.get(3))
-frame_height = int(cap.get(4))
+    Args:
+        video: Input videoeo from which background is to be created; a list of frames
+        buf_size: number of frames over which the median is considered;
+            Use odd number only;
+            higher buffer size -> smoother background
 
-bufCap = 41
+    Returns: List of frames; frame is a 2D numpy array
+    """
 
-# record the video
-# out1 = cv2.VideoWriter('original.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 15, (frame_width,frame_height))
-out2 = cv2.VideoWriter('DubBG.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 15, (frame_width,frame_height))
+    frame_width = int(np.shape(video)[2])
+    frame_height = int(np.shape(video)[1])
 
-buf = np.zeros((bufCap, frame_height, frame_width, 3),np.uint8)
-bg = np.zeros((frame_height, frame_width, 3),np.uint8)
+    print("width: " + str(frame_width))
+    print("height: " + str(frame_height))
 
-while(1):
-    # read the frame
-    ret, frame = cap.read()
-    
-    if ret is True:
-        
-        # convert to greyscale
-#         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        
-        # add frame to buffer
-        buf[0] = frame
-        
-#         cv2.imshow('frame0', buf[0])
-        
+    # buffer used for calculating the median
+    buf = np.zeros((buf_size, frame_height, frame_width, 3), np.uint8)
+    # one frame of background
+    bg_frame = np.zeros((frame_height, frame_width, 3),np.uint8)
+
+    # background videoeo to be returned
+    output = []
+
+    for i in range(0, len(video)):
+
+        # add the frame to the front of the buffer
+        buf[0] = video[i]
+
         # rotate buffer by 1 position to move the latest frame to the end of the buffer
         buf = np.roll(buf, 1, axis=0)
-#         print(np.shape(buf))
-        np.median(buf, axis=0, out=bg)
-#         bg = cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR)
-        
-        # write original frame
-#         out1.write(frame)
-        # write calculated background frame
-        sum = np.sum(bg)
-        if sum > 0:
-            out2.write(bg)
-            cv2.imshow('bg', bg)
-        
-        k = cv2.waitKey(1) & 0xff
-        if k == 27:
-            break
-    else:
-        break
-    
-cap.release()
-# out1.release()
-out2.release()
 
-cv2.destroyAllWindows()
+        # calculate median of buffer and store it in bg_frame maintaing the same data type (uint8)
+        np.median(buf, axis=0, out=bg_frame)
+
+        # skip the first half of the frames, because media will be black
+        if i > buf_size/2:
+            output.append(bg_frame)
+
+    return output
