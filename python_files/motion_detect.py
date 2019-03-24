@@ -16,7 +16,7 @@ def detect_motion(video):
     frame_height = int(np.shape(video)[1])
 
     # create background subtractor
-    fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=True, history=100)
+    fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 
     # kernel for morphological operations
     kernel1 = np.ones((3,3),np.uint8)
@@ -35,7 +35,7 @@ def detect_motion(video):
 
         # remove small noise
         img = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel1)
-        img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel1)
+        # img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel1)
 
         # dilate to get larger blob
         img = cv2.dilate(img,kernel2,iterations = 1)

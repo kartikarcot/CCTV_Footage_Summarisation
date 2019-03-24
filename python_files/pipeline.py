@@ -1,6 +1,8 @@
 # import libraries
 import numpy as np
 import cv2
+from timeit import default_timer as timer
+
 
 # user imports
 import background
@@ -139,47 +141,61 @@ class VideoSummary(object):
         return summary
 
 
-vid_sum = VideoSummary()
-video = vid_sum.read_file('../DubRun.mp4')
+if __name__ == '__main__':
+    vid_sum = VideoSummary()
+    video = vid_sum.read_file('../20sec.mp4')
 
-# bg = background.create_background(video, 41)
-bg = vid_sum.read_file('../DubBG.avi')
+    # start = timer()
+    # bg = background.create_background_parallel(video[0:200], 151)
+    # end = timer()
+    # print("Parallel: " + str(end - start))
 
-motion_mask = md.detect_motion(video)
+    # start = timer()
+    # bg = background.create_background(video[0:200], 151)
+    # end = timer()
+    # print("Serial: " + str(end - start))
 
-# vid_sum.write_file(motion_mask, "motion_mask.avi")
+    # vid_sum.write_file(bg, "../20sec_BG_TEST.avi")
+    # bg = vid_sum.read_file('../20sec_BG.avi')
 
-labelled_volume  = tb.label_tubes(motion_mask)
-print("done labelling tubes\n")
+    # exit()
+    motion_mask = md.detect_motion(video)
 
-uniq, count = np.unique(labelled_volume, return_counts = True)
-print(uniq)
-print(count)
+    vid_sum.write_file(motion_mask, "motion_mask.avi")
 
-tubes = tb.extract_tubes(labelled_volume)
-print("\ndone extracting volumes\n")
+    exit()
 
-object_tubes, masked_tubes = tb.create_object_tubes(video, tubes)
-print("\ndone creating color and masked tubes")
+    labelled_volume  = tb.label_tubes(motion_mask)
+    print("done labelling tubes\n")
 
-# for i in range(0, len(object_tubes)):
-#     vid_sum.write_file(object_tubes[i], "filename{}.avi".format(i))
+    uniq, count = np.unique(labelled_volume, return_counts = True)
+    print(uniq)
+    print(count)
+
+    tubes = tb.extract_tubes(labelled_volume)
+    print("\ndone extracting volumes\n")
+
+    object_tubes, masked_tubes = tb.create_object_tubes(video, tubes)
+    print("\ndone creating color and masked tubes")
+
+    # for i in range(0, len(object_tubes)):
+    #     vid_sum.write_file(object_tubes[i], "filename{}.avi".format(i))
 
 
-anneal = op.SimulatedAnnealing(10000, 1, 20, 3)
+    anneal = op.SimulatedAnnealing(10000, 1, 20, 3)
 
-tube_dict = {}
+    tube_dict = {}
 
-for i in range(0, len(object_tubes)):
-    tube_dict[i] = [np.asarray(object_tubes[i]), 0, len(object_tubes[i])]
+    for i in range(0, len(object_tubes)):
+        tube_dict[i] = [np.asarray(object_tubes[i]), 0, len(object_tubes[i])]
 
-# tube_dict = { 1: [a, 0, 50],
-#     2: [c, 0, 150],
-#     3: [b, 0, 50],
-# }
+    # tube_dict = { 1: [a, 0, 50],
+    #     2: [c, 0, 150],
+    #     3: [b, 0, 50],
+    # }
 
-tube_dict = anneal.run(tube_dict)
+    tube_dict = anneal.run(tube_dict)
 
-summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)
+    summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)
 
-vid_sum.write_file(summary, "summary.avi")
+    vid_sum.write_file(summary, "summary.avi")

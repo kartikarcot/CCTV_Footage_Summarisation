@@ -55,7 +55,7 @@ class SimulatedAnnealing(object):
         shift_dict = {}
 
         for i, key in enumerate(list(tube_dict.keys())):
-            shift_dict[key] = int(uniform(-5, 10.0))
+            shift_dict[key] = int(uniform(-25, 50.0))
             if tube_dict[key][1] + shift_dict[key] < 0:
                 shift_dict[key] = -tube_dict[key][1]
 
@@ -101,7 +101,6 @@ class SimulatedAnnealing(object):
                         print(tube_dict[key][1])
 
 #                     print(new_cost)
-                    curr_config = new_config
                     curr_cost = new_cost
 
                     # Update the start times using shifts of new config
