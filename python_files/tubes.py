@@ -103,7 +103,9 @@ def label_tubes(video_mask):
     frame_width = int(np.shape(video_mask)[2])
     frame_height = int(np.shape(video_mask)[1])
 
-    volume = [np.zeros((frame_height, frame_width), dtype=np.uint8)] # 3D volume; A list of frames storing the labelled images
+    # 3D volume; A list of frames storing the labelled images
+    # Added a blank frame so that there is a 'previous frame' for the first frame of input
+    volume = [np.zeros((frame_height, frame_width), dtype=np.uint8)]
     labels = [[1]] # A list storing the tube labels in each image in the volume
     tube_num = 0 # Number of tubes found
     prev_count = 1 # OpenCV returns at least 1 label (i.e. the background)
@@ -212,6 +214,9 @@ def label_tubes(video_mask):
     #         # Update labels of tubes in previous frame
     #         frame[frame == index] = tube_num
 
+    # Remove the 1st blank frame added in the beginning
+    del volume[0]
+
     return volume
 
 def extract_tubes(labelled_volume):
@@ -219,13 +224,21 @@ def extract_tubes(labelled_volume):
     Extracts each tube into individual volumes
     """
 
+    # threshold of active pixels for tubes to be extracted
+    THRESHOLD = 10000
+
     tubes = [] # list of volumes
 
     # get the unique labels within the volume
-    uniq = np.unique(labelled_volume)
+    uniq, count = np.unique(labelled_volume, return_counts = True)
 
-    # skip index 0, since it is BG
+    # skip label 0, since it represents the BG (OpenCV connected components output)
     for i in range(1, len(uniq)):
+
+        # skip tubes where the active pixel count is less, it is probably noise
+        if count[i] < THRESHOLD:
+            print("Skipped " + str(count[i]))
+            continue
 
         tube = []   # tube of current object
         # labelled_vol_copy = labelled_volume.copy()
@@ -249,11 +262,13 @@ def create_object_tubes(video, tubes):
 
     # print("Shape of tube :" + str(np.shape(tubes[1])))
 
+    # i represents current tube being processed
     for i in range(0, len(tubes)):
 
         color_tube = []
         masked_tube = []
 
+        # j represents the current frame in the tube being processed (i)
         for j in range(0, len(tubes[i])):
 
             active_pixels = int(np.sum(tubes[i][j])/255)
