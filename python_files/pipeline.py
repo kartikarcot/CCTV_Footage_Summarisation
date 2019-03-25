@@ -10,7 +10,7 @@ import motion_detect as md
 import tubes as tb
 import optimize as op
 import blend as bd
-
+import detector as dtct
 class VideoSummary(object):
 
     def __init__(self):
@@ -143,7 +143,7 @@ class VideoSummary(object):
 
 if __name__ == '__main__':
     vid_sum = VideoSummary()
-    video = vid_sum.read_file('../20sec.mp4')
+    video = vid_sum.read_file('../DubRun.mp4')
 
     # start = timer()
     # bg = background.create_background_parallel(video[0:200], 151)
@@ -151,7 +151,9 @@ if __name__ == '__main__':
     # print("Parallel: " + str(end - start))
 
     # start = timer()
-    # bg = background.create_background(video[0:200], 151)
+    # bg = background.create_background(video, 151)
+    bg = vid_sum.read_file("bg.avi")
+    print("created")
     # end = timer()
     # print("Serial: " + str(end - start))
 
@@ -159,43 +161,69 @@ if __name__ == '__main__':
     # bg = vid_sum.read_file('../20sec_BG.avi')
 
     # exit()
-    motion_mask = md.detect_motion(video)
-
+    motion_mask = md.detect_motion(video)   #should be changed to return list of clip names(named after the timestamp) wherever motion ocurred
     vid_sum.write_file(motion_mask, "motion_mask.avi")
 
-    exit()
-
-    labelled_volume  = tb.label_tubes(motion_mask)
-    print("done labelling tubes\n")
+    start = timer()
+    labelled_volume  = tb.label_tubes(motion_mask) #should be changed to take input of list of clipnames and return list of {labelled volume, start time}
+    end = timer()
+    print("done labelling tubes " + str(end-start))
 
     uniq, count = np.unique(labelled_volume, return_counts = True)
     print(uniq)
     print(count)
 
-    tubes = tb.extract_tubes(labelled_volume)
+    #currently changed extract_tubes to return a list of dictionaries
+    tubes = tb.extract_tubes(labelled_volume) #should be changed to take input of list of {labelled volume, start time} and return list of {individual tubes, start time}
     print("\ndone extracting volumes\n")
 
-    object_tubes, masked_tubes = tb.create_object_tubes(video, tubes)
+    # added color tube into each tube dictionary in the list
+    tubes = tb.create_object_tubes(video, tubes)
     print("\ndone creating color and masked tubes")
+    
+    config = "../Yolo/yolov3.cfg"
+    weights = "../Yolo/yolov3.weights"
+    labels = "../Yolo/coco.names"
+    conf = 0.5
+    thresh = 0.8
+    detObj = dtct.Object_Detector(config, weights, labels, conf, thresh)
+    tubes = detObj.add_tags(tubes)
 
-    # for i in range(0, len(object_tubes)):
-    #     vid_sum.write_file(object_tubes[i], "filename{}.avi".format(i))
+    #sample query
+    query = {'tags':['person'], 'start':None, 'end':None, 'syn_length':None}
+    selected_tubes = detObj.select_tubes(tubes, query)
+    print("selected tubes are" + str(len(selected_tubes)))
+    
+    
+######################################################################################################
+    # exit() #remove this to continue with simulated annealing
+################################################################################################################################
+
+    for i in range(0, len(selected_tubes)):
+        vid_sum.write_file(selected_tubes[i]['color_tube'], "filename{}.avi".format(i))
 
 
     anneal = op.SimulatedAnnealing(10000, 1, 20, 3)
-
     tube_dict = {}
 
-    for i in range(0, len(object_tubes)):
-        tube_dict[i] = [np.asarray(object_tubes[i]), 0, len(object_tubes[i])]
+    for i,tube in enumerate(selected_tubes):
+        tube_dict[i] = [np.asarray(tube['color_tube']), 0, len(tube['color_tube'])]
 
-    # tube_dict = { 1: [a, 0, 50],
-    #     2: [c, 0, 150],
-    #     3: [b, 0, 50],
-    # }
-
+    '''
+    tube_dict = { 1: [a, 0, 50],
+        2: [c, 0, 150],
+        3: [b, 0, 50],
+    }
+    '''
     tube_dict = anneal.run(tube_dict)
-
+    
+    masked_tubes = []
+    for i,tube in enumerate(selected_tubes):
+        masked_tubes.append(tube["tube"])
+        vid_sum.write_file(tube['tube'], str(i)+'.avi')
+    
     summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)
 
     vid_sum.write_file(summary, "summary.avi")
+
+####################################################################################################################################

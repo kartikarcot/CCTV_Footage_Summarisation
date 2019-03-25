@@ -17,9 +17,16 @@ def blend_image(bg, fg, mask):
     # We need to find the center of a rectangle that bounds all the white pixels in the mask.
     # The center is passed as a parameter to the seamless blending function to 
     # position the object in the same position as in the mask.
-    
+    '''
+    cv2.imshow("mask", mask)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    '''
     width, height, _ = np.shape(bg)
     _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    if(len(contours)==0):
+        print("empty mask")
+        return bg
     
     # find the bounding points of the contour
     x,y,w,h = cv2.boundingRect(contours[0])

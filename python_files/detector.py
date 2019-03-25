@@ -1,7 +1,11 @@
+import cv2
+import numpy as np
+import time
+
 class Object_Detector(object):
     
     def __init__(self, configPath, weightsPath, labelsPath, confidence=0.5, threshold=0.8):
-        #  you’ll need at least OpenCV 3.4.2  for dnn module
+        #  you'll need at least OpenCV 3.4.2  for dnn module 
         self.configPath = configPath
         self.weightsPath = weightsPath
         self.labelsPath = labelsPath
@@ -74,11 +78,27 @@ class Object_Detector(object):
         # ensure at least one detection exists
     
     def return_tags(self,image):
+        
         idxs, boxes, confidences, classIDs = self.detect_object(image)
-        tags = [int(i) for i in idxs.flatten()]
-        tags = list(dict.fromkeys(tags))
-        names = [self.LABELS[i] for i in tags]
-        return names
+        if(len(idxs)>0):
+            tags = [int(i) for i in idxs.flatten()]
+            tags = list(dict.fromkeys(tags))
+            names = [self.LABELS[i] for i in tags]
+        else:
+            names= []
+        return set(names)
+    
+    def add_tags(self, tubes, step=0.1):
+        
+        for tube in tubes:
+            length = len(tube['color_tube'])
+            tube['tags'] = set()
+            for inc in range(0,1,step):
+                frame  = tube['color_tube'][int(length*inc)]
+                tube['tags'].union(self.return_tags(frame))
+            # print("tags are " + str(tags))
+        return tubes
+
     
     def draw_boxes(self, idxs, boxes, confidences, classIDs, image):
         np.random.seed(42)
@@ -99,15 +119,28 @@ class Object_Detector(object):
         cv2.imwrite("Image.jpg", image)
         return
         
-        
+    def select_tubes(self, tubes, query): #update function to consider time durations also
+        selected = []
+        qset = query['tags']
+        for tube in tubes:
+            tset = tube['tags']
+            if(bool(qset.intersection(tset))):
+                selected.append(tube)
+                # cv2.imshow(str(qset.intersection(tset)), tube['color_tube'][int(0.5*len(tube['color_tube']))])
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
+        return selected
+
+# example usage
 '''
-example usage
-c = "Yolo/yolov3.cfg"
-w = "Yolo/yolov3.weights"
-l = "Yolo/coco.names"
+c = "../Yolo/yolov3.cfg"
+w = "../Yolo/yolov3.weights"
+l = "../Yolo/coco.names"
 conf = 0.5
 thresh = 0.8
 obj = Object_Detector(c,w,l, 0.9)
-img = cv2.imread("Images/dub.png")
-obj.return_tags(img)
+img = cv2.imread("../Images/run.png")
+print(obj.return_tags(img))
+idxs, boxes, confidences, classIDs = obj.detect_object(img)
+obj.draw_boxes(idxs, boxes, confidences, classIDs, img)
 '''
