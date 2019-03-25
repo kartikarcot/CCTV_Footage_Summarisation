@@ -1,7 +1,7 @@
 import numpy as np
 from multiprocessing import Pool
 import cv2
-
+from tqdm import tqdm
 def create_background(video, buf_size):
     """
     Creates the background of clip using temporal median
@@ -37,7 +37,7 @@ def create_background(video, buf_size):
     output = []
 
     print("vid len = " + str(len(video)))
-    for i in range(0, len(video)):
+    for i in tqdm(range(0, len(video))):
 
         # if i % 50 is 0:
         #     print("BG generation frame: " + str(i))

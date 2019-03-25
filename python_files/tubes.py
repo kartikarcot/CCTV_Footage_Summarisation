@@ -243,15 +243,25 @@ def extract_tubes(labelled_volume):
         tube = []   # tube of current object
         # labelled_vol_copy = labelled_volume.copy()
         label = uniq[i] # current label
+        
+        start=False
+        startFrame = 0
+        endFrame = len(labelled_volume)
 
-        for frame in labelled_volume:
+        for frameno, frame in enumerate(labelled_volume):
             frame_copy = frame.copy()
+            if(not start and frame_copy[frame_copy==label].any()):
+                start = True
+                startFrame = frameno
+
             frame_copy[frame_copy==label] = 255
             frame_copy[frame_copy!=255] = 0
             frame_copy = frame_copy.astype(np.uint8)  # make sure type is uint8
             tube.append(frame_copy)
-
-        tubes.append(tube)
+        
+        endFrame = startFrame + len(tube)
+        tubeStruc = {"start":startFrame, "end":endFrame, "tube":tube}
+        tubes.append(tubeStruc)
 
     return tubes
 
@@ -267,28 +277,29 @@ def create_object_tubes(video, tubes):
 
         color_tube = []
         masked_tube = []
-
+        tube = tubes[i]["tube"]
         # j represents the current frame in the tube being processed (i)
-        for j in range(0, len(tubes[i])):
+        for j in range(0, len(tube)):
 
-            active_pixels = int(np.sum(tubes[i][j])/255)
+            active_pixels = int(np.sum(tube[j])/255)
 
             # only consider frames with events/activity
             if active_pixels > 0:
                 ###########
                 kernel2 = np.ones((7,7),np.uint8)
-                tubes[i][j] = cv2.dilate(tubes[i][j], kernel2,iterations = 1)
+                tube[j] = cv2.dilate(tube[j], kernel2,iterations = 1)
                 ###########
 
                 #mask has to be converted to 3 channel for bitwise operation
-                color_frame = cv2.bitwise_and(video[j], cv2.cvtColor(tubes[i][j],cv2.COLOR_GRAY2BGR))
+                color_frame = cv2.bitwise_and(video[j], cv2.cvtColor(tube[j],cv2.COLOR_GRAY2BGR))
                 color_tube.append(color_frame)
-                masked_tube.append(tubes[i][j])
+                masked_tube.append(tube[j])
 
-        color_tubes.append(color_tube)
-        masked_tubes.append(masked_tube)
+        # color_tubes.append(color_tube)
+        # masked_tubes.append(masked_tube)
+        tubes[i]["color_tube"] = color_tube
 
         print("color shape: " + str(np.shape(color_tube)))
         print("mask shape: " + str(np.shape(masked_tube)))
 
-    return color_tubes, masked_tubes
+    return tubes
