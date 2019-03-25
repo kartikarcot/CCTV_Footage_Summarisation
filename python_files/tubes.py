@@ -245,22 +245,26 @@ def extract_tubes(labelled_volume):
         label = uniq[i] # current label
         
         start=False
-        startFrame = 0
-        endFrame = len(labelled_volume)
+        start_frame = 0
+        end_frame = len(labelled_volume)
 
         for frameno, frame in enumerate(labelled_volume):
             frame_copy = frame.copy()
             if(not start and frame_copy[frame_copy==label].any()):
                 start = True
-                startFrame = frameno
+                start_frame = frameno
+            if(start and not frame_copy[frame_copy==label].any()):
+                end_frame = frameno
+                break
 
-            frame_copy[frame_copy==label] = 255
-            frame_copy[frame_copy!=255] = 0
-            frame_copy = frame_copy.astype(np.uint8)  # make sure type is uint8
-            tube.append(frame_copy)
+            if start is True:
+                frame_copy[frame_copy==label] = 255
+                frame_copy[frame_copy!=255] = 0
+                frame_copy = frame_copy.astype(np.uint8)  # make sure type is uint8
+                tube.append(frame_copy)
         
-        endFrame = startFrame + len(tube)
-        tubeStruc = {"start":startFrame, "end":endFrame, "tube":tube}
+        # end_frame = start_frame + len(tube)
+        tubeStruc = {"start":start_frame, "end":end_frame, "tube":tube}
         tubes.append(tubeStruc)
 
     return tubes
@@ -271,27 +275,31 @@ def create_object_tubes(video, tubes):
     masked_tubes = []
 
     # print("Shape of tube :" + str(np.shape(tubes[1])))
-
+    print("video length is " + str(len(video)))
     # i represents current tube being processed
     for i in range(0, len(tubes)):
 
         color_tube = []
         masked_tube = []
         tube = tubes[i]["tube"]
+        start_frame = tubes[i]["start"]
         # j represents the current frame in the tube being processed (i)
+        print("start: "+str(tubes[i]['start']))
+        print("length: "+str(tubes[i]['end']-tubes[i]['start']))
+        print(len(tube))
         for j in range(0, len(tube)):
-
+            
             active_pixels = int(np.sum(tube[j])/255)
 
             # only consider frames with events/activity
             if active_pixels > 0:
                 ###########
-                kernel2 = np.ones((7,7),np.uint8)
-                tube[j] = cv2.dilate(tube[j], kernel2,iterations = 1)
+                # kernel2 = np.ones((7,7),np.uint8)
+                # tube[j] = cv2.dilate(tube[j], kernel2,iterations = 1)
                 ###########
 
                 #mask has to be converted to 3 channel for bitwise operation
-                color_frame = cv2.bitwise_and(video[j], cv2.cvtColor(tube[j],cv2.COLOR_GRAY2BGR))
+                color_frame = cv2.bitwise_and(video[start_frame + j], cv2.cvtColor(tube[j],cv2.COLOR_GRAY2BGR))
                 color_tube.append(color_frame)
                 masked_tube.append(tube[j])
 

@@ -24,6 +24,7 @@ def blend_image(bg, fg, mask):
     '''
     width, height, _ = np.shape(bg)
     _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
     if(len(contours)==0):
         print("empty mask")
         return bg

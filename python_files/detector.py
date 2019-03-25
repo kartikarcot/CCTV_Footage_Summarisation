@@ -2,9 +2,13 @@ import cv2
 import numpy as np
 import time
 
+'''
+feedforward of yolo outs scores and positions of each category for each type of box
+these values are fed to NMS function which returns a list of values which are the indices of cateogories in the classIDs and boxes list
+'''
 class Object_Detector(object):
     
-    def __init__(self, configPath, weightsPath, labelsPath, confidence=0.5, threshold=0.8):
+    def __init__(self, configPath, weightsPath, labelsPath, confidence=0.9, threshold=0.8):
         #  you'll need at least OpenCV 3.4.2  for dnn module 
         self.configPath = configPath
         self.weightsPath = weightsPath
@@ -80,23 +84,33 @@ class Object_Detector(object):
     def return_tags(self,image):
         
         idxs, boxes, confidences, classIDs = self.detect_object(image)
-        if(len(idxs)>0):
-            tags = [int(i) for i in idxs.flatten()]
+        if(len(classIDs)>0):
+            tags = [classIDs[int(i)] for i in idxs.flatten()]
             tags = list(dict.fromkeys(tags))
             names = [self.LABELS[i] for i in tags]
+            
         else:
             names= []
+        # print("names are " + str(names))
         return set(names)
     
-    def add_tags(self, tubes, step=0.1):
+    def add_tags(self, tubes, step=20):
         
         for tube in tubes:
             length = len(tube['color_tube'])
             tube['tags'] = set()
-            for inc in range(0,1,step):
-                frame  = tube['color_tube'][int(length*inc)]
-                tube['tags'].union(self.return_tags(frame))
-            # print("tags are " + str(tags))
+            for inc in range(0,length,step):
+                frame  = tube['color_tube'][int(inc)]
+                tube['tags'] = tube['tags'].union(self.return_tags(frame))
+
+                # cv2.imshow("selected frame", frame)
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
+            # print("tags are " + str(tube['tags']))
+                if('bicycle' in tube['tags']):
+                    idxs, boxes, confidences, classIDs = self.detect_object(frame)
+                    self.draw_boxes(idxs, boxes, confidences, classIDs, frame)
+
         return tubes
 
     
@@ -104,31 +118,36 @@ class Object_Detector(object):
         np.random.seed(42)
         COLORS = np.random.randint(0, 255, size=(len(self.LABELS), 3), dtype="uint8")
         if len(idxs) > 0:
+
+            # print("idxs: " + str(idxs))
+
             # loop over the indexes we are keeping
             for i in idxs.flatten():
                 # extract the bounding box coordinates
-                (x, y) = (boxes[i][0], boxes[i][1])
-                (w, h) = (boxes[i][2], boxes[i][3])
+                
+                if classIDs[i] == 1:
+                    print('i is ' + str(i))
+                    (x, y) = (boxes[i][0], boxes[i][1])
+                    (w, h) = (boxes[i][2], boxes[i][3])
 
-                # draw a bounding box rectangle and label on the image
-                color = [int(c) for c in COLORS[classIDs[i]]]
-                cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
-                text = "{}: {:.4f}".format(self.LABELS[classIDs[i]], confidences[i])
-                print("label is " + text)
-                cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-        cv2.imwrite("Image.jpg", image)
+                    # draw a bounding box rectangle and label on the image
+                    color = [int(c) for c in COLORS[classIDs[i]]]
+                    cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
+                    text = "{}: {:.4f}".format(self.LABELS[classIDs[i]], confidences[i])
+                    print("label is " + text)
+                    cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    cv2.imwrite(str(time.time())+".jpg", image)
         return
         
     def select_tubes(self, tubes, query): #update function to consider time durations also
         selected = []
-        qset = query['tags']
+        qset = set(query['tags'])
         for tube in tubes:
             tset = tube['tags']
             if(bool(qset.intersection(tset))):
                 selected.append(tube)
-                # cv2.imshow(str(qset.intersection(tset)), tube['color_tube'][int(0.5*len(tube['color_tube']))])
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
+                # print("tube tags: "+str(tset))
+                
         return selected
 
 # example usage

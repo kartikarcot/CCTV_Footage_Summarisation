@@ -129,3 +129,13 @@ def create_background_parallel(video, buf_size):
     print(np.shape(bg_frames))
 
     return bg_frames
+
+def create_timelapse_video(video, req_time):
+    """
+        Args:
+        video: input video
+        req_time: Time in frames of output timelapse
+    """
+    skip = int(len(video) / req_time)
+    timelapse = [video[i] for i in range(0, len(video), skip)]
+    return timelapse
