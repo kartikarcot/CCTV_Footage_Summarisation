@@ -7,10 +7,12 @@ def detect_motion(video):
 
     Args: input video; 3 channels
 
-    Returns: masked video; greyscale image (single channel)
+    Returns: masked video; greyscale image (single channel) &
+        calculated static background
     """
 
     output = []
+    bg = []
 
     frame_width = int(np.shape(video)[2])
     frame_height = int(np.shape(video)[1])
@@ -62,4 +64,8 @@ def detect_motion(video):
 
         output.append(img)
 
-    return output
+        # Get the background image from the model
+        bg_img = fgbg.getBackgroundImage()
+        bg.append(bg_img)
+
+    return output, bg

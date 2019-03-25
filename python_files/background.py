@@ -129,5 +129,3 @@ def create_background_parallel(video, buf_size):
     print(np.shape(bg_frames))
 
     return bg_frames
-
-
