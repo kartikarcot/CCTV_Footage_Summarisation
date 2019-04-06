@@ -180,7 +180,7 @@ if __name__ == '__main__':
     # added color tube into each tube dictionary in the list
     tubes = tb.create_object_tubes(video, tubes)
     print("\ndone creating color and masked tubes")
-    
+
     config = "../Yolo/yolov3.cfg"
     weights = "../Yolo/yolov3.weights"
     labels = "../Yolo/coco.names"
@@ -193,8 +193,8 @@ if __name__ == '__main__':
     query = {'tags':['person'], 'start':None, 'end':None, 'syn_length':None}
     selected_tubes = detObj.select_tubes(tubes, query)
     print("selected tubes are" + str(len(selected_tubes)))
-    
-    
+
+
 ######################################################################################################
     # exit() #remove this to continue with simulated annealing
 ################################################################################################################################
@@ -216,12 +216,12 @@ if __name__ == '__main__':
     }
     '''
     tube_dict = anneal.run(tube_dict)
-    
+
     masked_tubes = []
     for i,tube in enumerate(selected_tubes):
         masked_tubes.append(tube["tube"])
         vid_sum.write_file(tube['tube'], str(i)+'.avi')
-    
+
     summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)
 
     vid_sum.write_file(summary, "summary.avi")
