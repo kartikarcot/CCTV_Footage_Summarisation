@@ -85,7 +85,7 @@ class VideoSummary(object):
         frame_width = int(np.shape(video)[2])
         frame_height = int(np.shape(video)[1])
 
-        out = cv2.VideoWriter(filename, cv2.VideoWriter_fourcc('M','J','P','G'), 15, (frame_width,frame_height))
+        out = cv2.VideoWriter(filename, cv2.VideoWriter_fourcc('M','J','P','G'), 30, (frame_width,frame_height))
         for frame in video:
 
             if len(np.shape(frame)) == 2:
@@ -111,6 +111,9 @@ class VideoSummary(object):
 
         video_length = self.calc_length(tube_dict)
 
+        bg = background.create_timelapse_video(bg, video_length)
+
+
         for i, key in enumerate(tube_dict):
 
             print("summary i = " + str(i))
@@ -121,29 +124,29 @@ class VideoSummary(object):
 
             # color tube
             tube = tube_dict[key][0]
-
+            masked_tube = masked_tubes[i]
             # index of frame to be copied
             index = 0
 
 
             for j in range(copy_index, copy_index+copy_length):
-                bg[j] = bd.blend_image(bg[j], tube[index], masked_tubes[i][index])
-                cv2.imshow('bg', bg[j])
-                cv2.imshow('fg', tube[index])
-                cv2.imshow('mask', masked_tubes[i][index])
-                cv2.waitKey(0)
+                bg[j] = bd.blend_image(bg[j], tube[index], masked_tube[index])
+                # cv2.imshow('bg', bg[j])
+                # cv2.imshow('fg', tube[index])
+                # cv2.imshow('mask', masked_tubes[i][index])
+                # cv2.waitKey(0)
                 index += 1
 
         for i in range(0, video_length):
             summary.append(bg[i])
 
-        cv2.destroyAllWindows()
+        # cv2.destroyAllWindows()
         return summary
 
 
 if __name__ == '__main__':
     vid_sum = VideoSummary()
-    video = vid_sum.read_file('../DubRun.mp4')
+    video = vid_sum.read_file('../1min.mp4')
 
     # start = timer()
     # bg = background.create_background_parallel(video[0:200], 151)
@@ -152,8 +155,8 @@ if __name__ == '__main__':
 
     # start = timer()
     # bg = background.create_background(video, 151)
-    bg = vid_sum.read_file("bg.avi")
-    print("created")
+    # bg = vid_sum.read_file("bg.avi")
+    # print("created")
     # end = timer()
     # print("Serial: " + str(end - start))
 
@@ -161,8 +164,9 @@ if __name__ == '__main__':
     # bg = vid_sum.read_file('../20sec_BG.avi')
 
     # exit()
-    motion_mask = md.detect_motion(video)   #should be changed to return list of clip names(named after the timestamp) wherever motion ocurred
-    vid_sum.write_file(motion_mask, "motion_mask.avi")
+    motion_mask, bg = md.detect_motion(video)   #should be changed to return list of clip names(named after the timestamp) wherever motion ocurred
+    # motion_mask = vid_sum.read_file("motion_mask.avi")
+    # bg = vid_sum.read_file("bg.avi")
 
     start = timer()
     labelled_volume  = tb.label_tubes(motion_mask) #should be changed to take input of list of clipnames and return list of {labelled volume, start time}
@@ -184,13 +188,13 @@ if __name__ == '__main__':
     config = "../Yolo/yolov3.cfg"
     weights = "../Yolo/yolov3.weights"
     labels = "../Yolo/coco.names"
-    conf = 0.5
-    thresh = 0.8
+    conf = 0.95
+    thresh = 0.9
     detObj = dtct.Object_Detector(config, weights, labels, conf, thresh)
     tubes = detObj.add_tags(tubes)
 
     #sample query
-    query = {'tags':['person'], 'start':None, 'end':None, 'syn_length':None}
+    query = {'tags':['motorbike','bicycle'], 'start':None, 'end':None, 'syn_length':None}
     selected_tubes = detObj.select_tubes(tubes, query)
     print("selected tubes are" + str(len(selected_tubes)))
 
@@ -216,6 +220,8 @@ if __name__ == '__main__':
     }
     '''
     tube_dict = anneal.run(tube_dict)
+    for i,key in enumerate(tube_dict):
+        print(tube_dict[key][1:])
 
     masked_tubes = []
     for i,tube in enumerate(selected_tubes):

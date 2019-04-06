@@ -97,15 +97,14 @@ class SimulatedAnnealing(object):
                 if delta < 0:
                     print("updating")
 
-                    for key in tube_dict:
-                        print(tube_dict[key][1])
-
 #                     print(new_cost)
                     curr_cost = new_cost
 
                     # Update the start times using shifts of new config
                     for key in tube_dict:
                         tube_dict[key][1] += new_config[key]
+                    for key in tube_dict:
+                        print(tube_dict[key][1:])
 
             T -= self.grad_T
 
