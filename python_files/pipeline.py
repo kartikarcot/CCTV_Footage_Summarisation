@@ -146,7 +146,9 @@ class VideoSummary(object):
 
 if __name__ == '__main__':
     vid_sum = VideoSummary()
-    video = vid_sum.read_file('../1min.mp4')
+    video = vid_sum.read_file('../videos/1min3.mp4')
+
+    print("Done loading video")
 
     # start = timer()
     # bg = background.create_background_parallel(video[0:200], 151)
@@ -168,14 +170,16 @@ if __name__ == '__main__':
     # motion_mask = vid_sum.read_file("motion_mask.avi")
     # bg = vid_sum.read_file("bg.avi")
 
+    print("Motion detection done")
+
     start = timer()
     labelled_volume  = tb.label_tubes(motion_mask) #should be changed to take input of list of clipnames and return list of {labelled volume, start time}
     end = timer()
     print("done labelling tubes " + str(end-start))
 
-    uniq, count = np.unique(labelled_volume, return_counts = True)
-    print(uniq)
-    print(count)
+    # uniq, count = np.unique(labelled_volume, return_counts = True)
+    # print(uniq)
+    # print(count)
 
     #currently changed extract_tubes to return a list of dictionaries
     tubes = tb.extract_tubes(labelled_volume) #should be changed to take input of list of {labelled volume, start time} and return list of {individual tubes, start time}
@@ -188,15 +192,15 @@ if __name__ == '__main__':
     config = "../Yolo/yolov3.cfg"
     weights = "../Yolo/yolov3.weights"
     labels = "../Yolo/coco.names"
-    conf = 0.95
-    thresh = 0.9
+    conf = 0.85
+    thresh = 0.8
     detObj = dtct.Object_Detector(config, weights, labels, conf, thresh)
     tubes = detObj.add_tags(tubes)
 
     #sample query
-    query = {'tags':['motorbike','bicycle'], 'start':None, 'end':None, 'syn_length':None}
+    query = {'tags':['car'], 'start':None, 'end':None, 'syn_length':None}
     selected_tubes = detObj.select_tubes(tubes, query)
-    print("selected tubes are" + str(len(selected_tubes)))
+    print("selected tubes are " + str(len(selected_tubes)))
 
 
 ######################################################################################################
