@@ -69,3 +69,35 @@ def blend_image(bg, fg, mask):
 
     return result
 
+def add_timestamp(img, mask, frame_no):
+    """
+    Adds timestamp of the event in the middle of the object
+
+    Args:
+        img: the blended image (BG + Object)
+        mask: mask of the object (single channel)
+        frame_no: the frame number, to be added as timestamp
+
+    Returns: The image with timestamp
+    """
+
+    seconds = int(frame_no/30)
+    mins = int(seconds/60)
+    if (seconds > 59):
+        seconds = seconds % 60
+    seconds_str = "{:0>2d}".format(seconds)  # pad with 0s
+    text =  str(mins) + ":" + seconds_str
+
+    contours, hierarchy = cv2.findContours(mask, 1, 2)
+    cnt = contours[0]
+    x,y,w,h = cv2.boundingRect(cnt)
+    # cv2.rectangle(img, (x,y),(x+w,y+h),(0,255,0), 2)
+
+    font = cv2.FONT_HERSHEY_DUPLEX
+    cv2.putText(img, text, (x + int(w/2), y + int(h/2)), font, 0.3 ,(255,255,255), 1, cv2.LINE_AA)
+
+    # cv2.imshow("img", img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    return img

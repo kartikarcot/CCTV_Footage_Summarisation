@@ -121,6 +121,7 @@ class VideoSummary(object):
             # index where the frames have to be put in the background
             copy_index = tube_dict[key][1]
             copy_length = tube_dict[key][2]
+            actual_start = tube_dict[key][3]
 
             # color tube
             tube = tube_dict[key][0]
@@ -135,7 +136,13 @@ class VideoSummary(object):
                 # cv2.imshow('fg', tube[index])
                 # cv2.imshow('mask', masked_tubes[i][index])
                 # cv2.waitKey(0)
+
+                # Add timestamp
+                bg[j] = bd.add_timestamp(bg[j], masked_tube[index], actual_start + index)
+
                 index += 1
+
+
 
         for i in range(0, video_length):
             summary.append(bg[i])
@@ -189,6 +196,8 @@ if __name__ == '__main__':
     tubes = tb.create_object_tubes(video, tubes)
     print("\ndone creating color and masked tubes")
 
+    bd.add_timestamp(tubes[0]['color_tube'][10], tubes[0]['tube'][10], 100)
+
     config = "../Yolo/yolov3.cfg"
     weights = "../Yolo/yolov3.weights"
     labels = "../Yolo/coco.names"
@@ -197,8 +206,24 @@ if __name__ == '__main__':
     detObj = dtct.Object_Detector(config, weights, labels, conf, thresh)
     tubes = detObj.add_tags(tubes)
 
+    all_tags = detObj.get_all_tags(tubes)
+
+    print(str(len(all_tags)) +  " tags found:")
+    for i in range(0, len(all_tags)):
+        print(str(i+1) + ". " + all_tags[i])
+    user_query = input("Select the required tags (comma separated numbers): ")
+    user_query_list = user_query.split(',')
+
+    generated_query = []
+    for i in range(0, len(user_query_list)):
+        tag_index = user_query_list[i]
+        tag_name = all_tags[int(tag_index)-1]
+        generated_query.append(tag_name)
+
+    print(generated_query)
+
     #sample query
-    query = {'tags':['car'], 'start':None, 'end':None, 'syn_length':None}
+    query = {'tags':['motorbike', 'bicycle'], 'start':None, 'end':None, 'syn_length':None}
     selected_tubes = detObj.select_tubes(tubes, query)
     print("selected tubes are " + str(len(selected_tubes)))
 
@@ -215,7 +240,8 @@ if __name__ == '__main__':
     tube_dict = {}
 
     for i,tube in enumerate(selected_tubes):
-        tube_dict[i] = [np.asarray(tube['color_tube']), 0, len(tube['color_tube'])]
+        # volume, start time (initialize it to 0), length, actual start time
+        tube_dict[i] = [np.asarray(tube['color_tube']), 0, len(tube['color_tube']), tube['start']]
 
     '''
     tube_dict = { 1: [a, 0, 50],

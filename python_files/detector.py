@@ -150,6 +150,18 @@ class Object_Detector(object):
 
         return selected
 
+    def get_all_tags(self, tubes):
+        """
+        Returns a list of all the tags found in the tubes
+        """
+
+        all_tags = set()
+
+        for i, tube in enumerate(tubes):
+            all_tags = all_tags.union(tube['tags'])
+
+        return list(all_tags)
+
 # example usage
 '''
 c = "../Yolo/yolov3.cfg"
