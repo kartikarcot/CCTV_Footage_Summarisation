@@ -7,25 +7,25 @@ feedforward of yolo outs scores and positions of each category for each type of 
 these values are fed to NMS function which returns a list of values which are the indices of cateogories in the classIDs and boxes list
 '''
 class Object_Detector(object):
-    
+
     def __init__(self, configPath, weightsPath, labelsPath, confidence=0.9, threshold=0.8):
-        #  you'll need at least OpenCV 3.4.2  for dnn module 
+        #  you'll need at least OpenCV 3.4.2  for dnn module
         self.configPath = configPath
         self.weightsPath = weightsPath
         self.labelsPath = labelsPath
         self.conf = confidence
         self.thresh = threshold
         self.net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
-        
+
         self.ln = self.net.getLayerNames()
         # determine only the *output* layer names that we need from YOLO
         self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
-        
+
         self.LABELS = open(labelsPath).read().strip().split("\n") # strip() removes leading and trailing whitespaces
 #         np.random.seed(42)
 #         COLORS = np.random.randint(0, 255, size=(len(LABELS), 3), dtype="uint8")
         return
-    
+
     def detect_object(self, image):
         (H, W) = image.shape[:2]
         cv2.imwrite("readImage.jpg", image)
@@ -43,7 +43,7 @@ class Object_Detector(object):
         boxes = []
         confidences = []
         classIDs = []
-        
+
         # loop over each of the layer outputs
         for output in layerOutputs:
             # loop over each of the detections
@@ -80,22 +80,22 @@ class Object_Detector(object):
         idxs = cv2.dnn.NMSBoxes(boxes, confidences, self.conf, self.thresh)
         return idxs, boxes, confidences, classIDs
         # ensure at least one detection exists
-    
-    def return_tags(self,image):
-        
+
+    def return_tags(self, image):
+
         idxs, boxes, confidences, classIDs = self.detect_object(image)
         if(len(classIDs)>0):
             tags = [classIDs[int(i)] for i in idxs.flatten()]
             tags = list(dict.fromkeys(tags))
             names = [self.LABELS[i] for i in tags]
-            
+
         else:
             names= []
         # print("names are " + str(names))
         return set(names)
-    
-    def add_tags(self, tubes, step=20):
-        
+
+    def add_tags(self, tubes, step=7):
+
         for tube in tubes:
             length = len(tube['color_tube'])
             tube['tags'] = set()
@@ -107,13 +107,13 @@ class Object_Detector(object):
                 # cv2.waitKey(0)
                 # cv2.destroyAllWindows()
             # print("tags are " + str(tube['tags']))
-                if('bicycle' in tube['tags']):
-                    idxs, boxes, confidences, classIDs = self.detect_object(frame)
-                    self.draw_boxes(idxs, boxes, confidences, classIDs, frame)
+                # if('bicycle' in tube['tags']):
+                #     idxs, boxes, confidences, classIDs = self.detect_object(frame)
+                #     self.draw_boxes(idxs, boxes, confidences, classIDs, frame)
 
         return tubes
 
-    
+
     def draw_boxes(self, idxs, boxes, confidences, classIDs, image):
         np.random.seed(42)
         COLORS = np.random.randint(0, 255, size=(len(self.LABELS), 3), dtype="uint8")
@@ -124,7 +124,7 @@ class Object_Detector(object):
             # loop over the indexes we are keeping
             for i in idxs.flatten():
                 # extract the bounding box coordinates
-                
+
                 if classIDs[i] == 1:
                     print('i is ' + str(i))
                     (x, y) = (boxes[i][0], boxes[i][1])
@@ -138,7 +138,7 @@ class Object_Detector(object):
                     cv2.putText(image, text, (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
                     cv2.imwrite(str(time.time())+".jpg", image)
         return
-        
+
     def select_tubes(self, tubes, query): #update function to consider time durations also
         selected = []
         qset = set(query['tags'])
@@ -147,8 +147,20 @@ class Object_Detector(object):
             if(bool(qset.intersection(tset))):
                 selected.append(tube)
                 # print("tube tags: "+str(tset))
-                
+
         return selected
+
+    def get_all_tags(self, tubes):
+        """
+        Returns a list of all the tags found in the tubes
+        """
+
+        all_tags = set()
+
+        for i, tube in enumerate(tubes):
+            all_tags = all_tags.union(tube['tags'])
+
+        return list(all_tags)
 
 # example usage
 '''

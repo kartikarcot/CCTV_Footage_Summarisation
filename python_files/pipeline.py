@@ -112,7 +112,7 @@ class VideoSummary(object):
         video_length = self.calc_length(tube_dict)
 
         bg = background.create_timelapse_video(bg, video_length)
-        
+
 
         for i, key in enumerate(tube_dict):
 
@@ -121,6 +121,7 @@ class VideoSummary(object):
             # index where the frames have to be put in the background
             copy_index = tube_dict[key][1]
             copy_length = tube_dict[key][2]
+            actual_start = tube_dict[key][3]
 
             # color tube
             tube = tube_dict[key][0]
@@ -135,7 +136,13 @@ class VideoSummary(object):
                 # cv2.imshow('fg', tube[index])
                 # cv2.imshow('mask', masked_tubes[i][index])
                 # cv2.waitKey(0)
+
+                # Add timestamp
+                bg[j] = bd.add_timestamp(bg[j], masked_tube[index], actual_start + index)
+
                 index += 1
+
+
 
         for i in range(0, video_length):
             summary.append(bg[i])
@@ -146,7 +153,9 @@ class VideoSummary(object):
 
 if __name__ == '__main__':
     vid_sum = VideoSummary()
-    video = vid_sum.read_file('../1min.mp4')
+    video = vid_sum.read_file('../videos/1min3.mp4')
+
+    print("Done loading video")
 
     # start = timer()
     # bg = background.create_background_parallel(video[0:200], 151)
@@ -168,14 +177,16 @@ if __name__ == '__main__':
     # motion_mask = vid_sum.read_file("motion_mask.avi")
     # bg = vid_sum.read_file("bg.avi")
 
+    print("Motion detection done")
+
     start = timer()
     labelled_volume  = tb.label_tubes(motion_mask) #should be changed to take input of list of clipnames and return list of {labelled volume, start time}
     end = timer()
     print("done labelling tubes " + str(end-start))
 
-    uniq, count = np.unique(labelled_volume, return_counts = True)
-    print(uniq)
-    print(count)
+    # uniq, count = np.unique(labelled_volume, return_counts = True)
+    # print(uniq)
+    # print(count)
 
     #currently changed extract_tubes to return a list of dictionaries
     tubes = tb.extract_tubes(labelled_volume) #should be changed to take input of list of {labelled volume, start time} and return list of {individual tubes, start time}
@@ -184,21 +195,39 @@ if __name__ == '__main__':
     # added color tube into each tube dictionary in the list
     tubes = tb.create_object_tubes(video, tubes)
     print("\ndone creating color and masked tubes")
-    
+
+    bd.add_timestamp(tubes[0]['color_tube'][10], tubes[0]['tube'][10], 100)
+
     config = "../Yolo/yolov3.cfg"
     weights = "../Yolo/yolov3.weights"
     labels = "../Yolo/coco.names"
-    conf = 0.95
-    thresh = 0.9
+    conf = 0.85
+    thresh = 0.8
     detObj = dtct.Object_Detector(config, weights, labels, conf, thresh)
     tubes = detObj.add_tags(tubes)
 
+    all_tags = detObj.get_all_tags(tubes)
+
+    print(str(len(all_tags)) +  " tags found:")
+    for i in range(0, len(all_tags)):
+        print(str(i+1) + ". " + all_tags[i])
+    user_query = input("Select the required tags (comma separated numbers): ")
+    user_query_list = user_query.split(',')
+
+    generated_query = []
+    for i in range(0, len(user_query_list)):
+        tag_index = user_query_list[i]
+        tag_name = all_tags[int(tag_index)-1]
+        generated_query.append(tag_name)
+
+    print(generated_query)
+
     #sample query
-    query = {'tags':['motorbike','bicycle'], 'start':None, 'end':None, 'syn_length':None}
+    query = {'tags':['motorbike', 'bicycle'], 'start':None, 'end':None, 'syn_length':None}
     selected_tubes = detObj.select_tubes(tubes, query)
-    print("selected tubes are" + str(len(selected_tubes)))
-    
-    
+    print("selected tubes are " + str(len(selected_tubes)))
+
+
 ######################################################################################################
     # exit() #remove this to continue with simulated annealing
 ################################################################################################################################
@@ -211,7 +240,8 @@ if __name__ == '__main__':
     tube_dict = {}
 
     for i,tube in enumerate(selected_tubes):
-        tube_dict[i] = [np.asarray(tube['color_tube']), 0, len(tube['color_tube'])]
+        # volume, start time (initialize it to 0), length, actual start time
+        tube_dict[i] = [np.asarray(tube['color_tube']), 0, len(tube['color_tube']), tube['start']]
 
     '''
     tube_dict = { 1: [a, 0, 50],
@@ -227,7 +257,7 @@ if __name__ == '__main__':
     for i,tube in enumerate(selected_tubes):
         masked_tubes.append(tube["tube"])
         vid_sum.write_file(tube['tube'], str(i)+'.avi')
-    
+
     summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)
 
     vid_sum.write_file(summary, "summary.avi")
