@@ -1,0 +1,60 @@
+\chapter{Overview of Video Summarization}
+
+After having gone through several important papers in this sector, we have narrowed down to follow the framework described in this section. It mainly has two phases: Real-Time Phase and Query Phase.
+
+
+\section{Real-time phase}
+The real-time phase reads the cctv footage, identifies clips of interest and performs certain image processing algorithms on the footage of interest to extract “flow-tubes” and tags from clips and stores them in a database. The phase is split into the following steps:
+
+\begin{enumerate}
+    \item \textbf{Motion Detection}
+
+    Detect motion in the footage and identify any clips with significant motion while disregarding artefacts due to changing environmental conditions and other insignificant disturbances.
+    MOG is used in this step to see if there is any movement, and if there is significant foreground present in an image, decided by a static threshold, we consider the clip to have motion in it. MOG is specifically useful here due to its dynamic nature and adaptability to gradual changes in the environment very quickly and, additionally, availability of efficient parallel CUDA implementations of this very effective algorithm.
+
+    \item \textbf{Background Masking}
+
+	A foreground extractor like a Mixture of Gaussians is used to extract the subjects of interests in the clips identified by motion detection.
+    The same technique used in previous step is also employed here to generate foreground masks and thereby just extracting the foreground. Several techniques were experimented on and it turns MOG is the best cost effective and accurate technique available for our specific needs.
+
+    \item \textbf{Computation of Objects flow-tubes}
+
+	Flow-tubes are computed from the extracted foreground in previous phase.
+    Flow tubes are extracted by performing morphological operations and several redundant foreground blobs are removed in this step. Furthermore, individual subjects present in each frame are identified, and related back with the subjects present in the previous frame, thereby producing flow-tube arrays.
+
+    \item \textbf{Object Tagging}
+
+	After actual subjects are identified in the previous phase, the subjects are classified into several popular categories using a popular deep-learning model called “You Only Look Once” model, and these tags are computed.
+	We use a pre-trained 26-layered YOLOv3 model as the most common categories present in a common CCTV video footage are already present in the set of categories identifiable on a YOLOv3 trained on the standard COCO dataset.
+
+    \item \textbf{Metadata storage}
+
+    In this stage, a connection is established to the database and the tags and flow-tubes computed are stored into the database.
+\end{enumerate}
+
+\section{Query Phase}
+
+The query phase processes the user input query, extracts the relevant tubes and generates a relevant summary. This phase is split into the following steps:
+
+\begin{itemize}
+
+    \item \textbf{Tube Selection}
+
+    The user query containing various parameters such as time period, tags and length of summary required are taken from user and relevant flow-tubes are selected from the database.
+    This stage is easily implemented by writing logic to create a query with all the parameters the user specifies in the input query.
+
+    \item \textbf{Rearrangement}
+    An optimisation algorithm, in our case simulated annealing, is used to rearrange the flow-tubes in the time dimension to produce a summary of the desired length.
+
+    While there are several heuristic based search algorithms are recommended for these purposes by different authors, simulated annealing remains to be the most successful and most popularly cited method. Hence, we have implemented simulated annealing with a custom cost function based on our needs.
+
+    \item \textbf{Time-lapsed background generation}
+    In this step a background is generated based on the time period and summary length required by user.
+    A weighted approach, with the periods where there is most activity, is considered more heavily in generating the time-lapsed background.
+
+    \item \textbf{Blending}
+    Poisson blending is used to blend the rearranged flow-tubes with the time-lapsed background to generate the summary we require. This summary is then saved onto the user’s computer.
+\end{itemize}
+
+\section{Summary}
+In this chapter, we have given an overview of how our solution to the problem statement of summarizing CCTV video footage is structured. However there is no strict constraints on following the above prescribed framework for solving this problem. In our view, this structure optimizes the amount of time required to generate summaries and also help in rapid prototyping and validating of various techniques/models during the course of developing the application.
