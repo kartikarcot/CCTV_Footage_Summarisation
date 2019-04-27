@@ -1,0 +1,82 @@
+\documentclass[12pt]{report}
+\usepackage{float}
+\usepackage{emptypage}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[section]{placeins}
+\usepackage[a4paper, margin=1in, left=1.4in]{geometry}
+\usepackage{rotating}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{ragged2e}
+\usepackage{array}
+\usepackage{tocbibind}
+\usepackage[colorlinks=true,linkcolor=black]{hyperref}
+\usepackage[export]{adjustbox}
+\usepackage{rotfloat}
+\usepackage{fancyhdr}
+\usepackage{etoolbox}
+\usepackage{multicol}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.pathmorphing}
+
+\graphicspath{ {./img/} }
+
+\usepackage[toc,acronym]{glossaries}
+\makeglossaries
+
+\newacronym{urc}{URC}{University Rover Challenge}
+\newacronym{gps}{GPS}{Global Positioning System}
+\newacronym{ssh}{SSH}{Secure SHell}
+\newacronym{rgb}{RGB}{Red-Green-Blue}
+% \newacronym{RGB-D}{Red-Green-Blue-Depth}
+\newacronym{tcp}{TCP}{Transmission Control Protocol}
+\newacronym{udp}{UDP}{User Datagram Protocol}
+\newacronym{lan}{LAN}{Local Area Network}
+\newacronym{gui}{GUI}{Graphical User Interface}
+\newacronym{ir}{IR}{InfraRed}
+\newacronym{lidar}{LIDAR}{LIght Detection And Ranging}
+
+
+
+\begin{document}
+\pagenumbering{gobble}
+
+\include{coverpages}
+
+% \printnoidxglossary[type=\acronymtype,title=Glossary]
+
+
+
+\pagenumbering{arabic}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LEO]{Chapter \thechapter}
+\fancyhead[REO]{CCTV Video Summarisation}
+\fancyfoot[L]{Dept. of CSE, RVCE}
+\fancyfoot[C]{2018 - 2019}
+\fancyfoot[R]{\thepage}
+\renewcommand{\headrulewidth}{1.25pt}
+\renewcommand{\footrulewidth}{1.25pt}
+
+\patchcmd{\chapter}{\thispagestyle{plain}}{\thispagestyle{fancy}}{}{}
+
+
+\include{chapter1}
+\include{chapter2}
+\include{chapter3}
+\include{chapter4}
+\include{chapter5}
+\include{chapter6}
+\include{chapter7}
+\begin{comment}
+
+    \include{chapter8}
+    \include{chapter9}
+\end{comment}
+
+\include{references}
+\end{document}

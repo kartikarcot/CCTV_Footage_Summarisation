@@ -1,0 +1,46 @@
+\chapter{Software Testing}
+The aim of Software Testing is to detect defects or errors testing the components of programs individually. During testing, the components are combined to form a complete system. At this particular stage, testing is concerned to demonstrate that the function meets the required functional goals, and does not behave in abnormal ways. The test cases are chosen to assure the system behavior can be tested for all combinations. Accordingly, the expected behavior of the system under different combinations is given. Therefore test cases are selected which have inputs and the outputs on expected lines, inputs that are not valid and for which suitable messages must be given and inputs that do not occur very frequently which can be regarded as special cases.  For testing software, various test strategies are to be used such as unit testing, integration testing, system testing and interface testing.
+
+In this chapter, several test cases are designed for testing the behavior of all modules. When all modules are implemented completely, they are integrated and deployed on Tomcat server or on Jetty Container. Test cases are executed under same environment. Test cases mainly contain tests for functionality of all modules. Once the application passes all the test cases it is deployed on the production environment for actual real time use.
+
+
+\section{Test Environment}
+The test environment is important to get right, because a major problem faced by most python tools are dependency issues. We use the Anaconda distribution of python and created a virtual environment with all the packages preinstalled. This way these environments can be easily exported to other systems as well. In the future we will look into writing a dockerfile to generate an linux image with all the existing dependencies pre-installed. Additionally, we used Jupyter notebook for modular development and testing as it provides an interactive way of developing and testing code.
+
+\section{Unit Testing of Main Modules}
+Unit test is the verification effort on the smallest unit of software design, the software modules. Unit testing ensures that the bugs that occur can be pinpointed easily since the code tested on is a small unit. The section describes some of the unit tests run with test case details and brief explanations.
+
+    \subsection{Unit testing of real-time phase modules}
+    The following tables show the test cases for Real-Time phase on which this testing is performed. The testing for forecasting of parameters’ values is as shown in the table below.
+
+    \subsubsection{Read Video Feed}
+
+    Table \ref{table:unit-video-read} shows the test case details for testing the Video Reader sub module. This test was successful. Here, the input was the video file which was successfully worked on by the submodule.
+
+
+    \FloatBarrier
+    \begin{table}[H]
+        \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
+            \hline
+            \textbf{Sl. No }              &\textbf{ 1}\\
+            \hline
+            \textbf{Name of the Test case}  & Read video \\
+            \hline
+            \textbf{Feature being Tested}  & Proper loading of video from disk \\
+            \hline
+            \textbf{Description}           &  Loading video smoothly, quickly and without exceptions \\
+            \hline
+            \textbf{Sample Input}          & Video File \\
+            \hline
+            \textbf{Expected Output}       & Load list of frames into memory if file exists else eror that file not found \\
+            \hline
+            \textbf{Actual Output}         & As expected \\
+            \hline
+            \textbf{Remarks }              & Test case passed successfully \\
+            \hline
+        \end{tabular}
+        \caption{Unit Testing of Video Read}
+        \label{table:unit-video-read}
+    \end{table}
+
+

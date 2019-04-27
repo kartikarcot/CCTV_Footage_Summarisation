@@ -1,0 +1,58 @@
+\chapter{Implementation}
+
+The implementation phase is significant phases in the project development as it affords final solution that solves the issues. In this phase the low level designs are transformed into the language specific programs such that the requirements given in the software requirements specification are satisfied. This phase entails actual implementation of ideas that were described in analysis and design phase. The technique and the methods that are used for implementing software must support reusability, ease of maintenance and should be well documented.
+
+\section{Programming Language Selection}
+The programming languages chosen to implement the project is Python. Python is one of the most useful languages in the current age and time with extensive support for fast development. Some of the benefits that Python provides which were key for choosing the same are:
+
+\begin{itemize}
+    \item Simple, easy and highly readable program syntax
+    \item Rapid development and prototyping process
+    \item Jupyter notebook supports step-by-step execution of code for easier debugging
+    \item Support of OpenCV wrapper
+\end{itemize}
+
+
+\section{Platform Selection}
+The system has a basic user interface for the user input \& query, and the backend system to process the input and generate the video summary. Python runs on all 3 major computing platforms Windows, Linux and MacOS. We have developed and tested our code on Windows and Mac platform using Python 3.6.
+
+\section{Code Conventions}
+
+This section discusses the coding standards followed throughout the project. It includes the software applications that are necessary to complete the project. Proper coding standards should be followed because large project should be coded in a consistent style. This makes it easier to understand any part of the code without much difficulty. Code conventions are important because it improves readability in software, allowing the programmers to understand code clearly.
+
+    \subsection{Naming Conventions}
+
+    Naming conventions helps programs in understandable manner which makes easier to read. The names given to packages, scripts, graphs and classes are to be clear and precise so that their contents can easily be understood. The project uses both Java and Python, and the naming convention followed in the two are slightly divergent from each other.
+
+    The conventions followed for this project are as follows:
+
+    \begin{itemize}
+        \item \textbf{Classes:} Class names are nouns. The upper camel casing method is followed, in which the first letter of every word is in capital, including the first word. Example: SimulatedAnnealing.
+        \item \textbf{Methods:} Methods should be a verb. For methods, snake case is followed, where the names are in lowercase and multiple words are separated by underscores. Example: make\_summary()
+        \item \textbf{Variables:} snake case is followed, where the names are in lowercase and multiple words are separated by underscores. Example: selected\_tubes
+    \end{itemize}
+
+    \subsection{File Organization}
+    The code used to implement the project was organized into multiple files based on the functionality and the module to which the methods belonged. Each file contains a class which contains the required attributes and methods.
+    Ex: SimulatedAnnealing class contains attributes like T\_max, T\_min, iterations etc and methods like calc\_cost(), optimize() etc
+
+
+    \subsection{Declarations}
+
+    Standard declaration conventions are followed while coding. Standard names are given which make it easy to understand the role of each entity declared. Multiple declarations per line are not allowed because of commenting and to reduce ambiguity.
+
+    \subsection{Comments}
+    Comments are necessary part of any coding conventions as it improves the understandability of the code developed. In the project files, thanks to the integrated development environments, commented areas are printed in grey by default, so they are easy to identify.
+    In Python comments start with a ‘\#’. There are keyboard shortcuts and mouse options provided to comment out or uncomment blocks of code with ease. Comments are used for explaining what function a certain piece of code performs especially if the code relies on implicit assumptions or otherwise perform subtle actions.
+
+\section{Difficulties Encountered and Strategies Used to Tackle}
+This section discusses some of the difficulties encountered while developing this project.
+
+    \subsection{Static Background Generation}
+    The system has to generate a static background from the moving background, and we proposed to use a temporal median for the same. Since the same was computationally intensive, we used the Mixture of Gaussians in OpenCV for estimating the static background, which performs better.
+
+    \subsection{Simulated Annealing}
+    The video summarizer optimizes the tubes which are extracted from the input video, and this is a NP-complete problem, where we can’t try every single possibility. A heuristic based optimization algorithm such as simulated annealing is required. We created cost functions which calculate the collision cost and length cost, which are used by the optimization algorithm. We use simulated annealing, which is a probabilistic technique, for estimating the global optimum. We evaluate the cost of a configuration and then decide whether to update the configuration based on other parameters. We optimized the simulated annealing algorithm by using a resized image, and by parallelizing it for faster processing.
+
+\section{Summary}
+This chapter deals with the programming language used which is Python, the development environment and the code conventions followed in the two languages during implementation of the application. It also explains the difficulties encountered in the course of implementation of the system like background generation and simulated annealing and the strategies used to handle them.
