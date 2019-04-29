@@ -1,6 +1,13 @@
 \chapter{Introduction}
 
-Introduction
+The number of CCTV surveillance cameras is increasing day by day leading to a huge amount digital video information being stored. Millions of CCTV cameras run 24 hours a day, sometimes even streaming the content over the internet for people to watch. This data is however in a raw, unedited format. In most of the cases, majority of the video being captured is irrelevant, storage of which leads to redundant data being stored.
+
+Our project proposes to build a CCTV video summarizer to eliminate this redundancy in stored data and give the user a short summary consisting of important information that is relevant for the specific use case. We also propose to incorporate a query based summary generation that is commercially unavailable in the market as of now. With our system, users can choose the necessary objects and events to create a short yet precise summary with only relevant information, thus reducing redundancy by an even greater margin.
+
+The process takes place over two phases, the real-time and query phase. The real-time phase reads the CCTV footage, identifies clips of interest, extracts the “flow-tubes”, and stores them after tagging them with the respective object tags. A query phase would then involve the user selecting the required tags and objects of interest, which are chosen. The tubes are rearranged using Simulated Annealing algorithm, before being blended into a generated time-lapsed background using an optimal technique like Poisson blending.
+
+This method would reduce the manual work of going through hours of footage looking for relevant events by automatically creating a summary. It can be mainly used for security purposes, by the police forces for detection of crimes and suspicious activities.
+
 
 \section{State of the art developments}
 

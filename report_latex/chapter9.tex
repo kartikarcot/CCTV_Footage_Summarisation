@@ -1,5 +1,25 @@
 \chapter{Conclusion}
 
+This project aimed to use a novel method to generate video summaries to reduce the amount of time spent in analyzing CCTV video footage. Our implementation of summarization by temporal rearrangement of events improves on other methods of just detecting frames of motion. The tag-based summary selects only the required type of event, reducing the summary length further.
+We have presented a proof-of-concept that can be extended to be used in commercial CCTV systems with further development.
+
 \section{Limitations of the Project}
 
+While the current system works well for small clips, there are limitations which prevent it from being used in CCTV system:
+    \begin{itemize}
+        \item Optimization algorithm doesn’t work very well when there are many events
+        \item Blending algorithm doesn’t make the summary look perfectly natural
+        \item Further performance improvements required for optimization phase, to make it run faster
+    \end{itemize}
+
 \section{Future Enhancement}
+
+To overcome the limitations of the project, the following will be taken up in the future:
+    \begin{itemize}
+        \item Improve performance by parallelizing and optimizing the code
+        \item Experimenting and improving the optimization algorithm for better results with lesser overlap
+        \item A simple UI for selecting the input, and setting the parameters for the summary is required, with links to go back to the original video
+    \end{itemize}
+
+\section{Summary}
+This chapter gives an overlook of the entire video summary system and briefly states the limitation of the project and future enhancements to grow and overcome the limitations of the same.
