@@ -14,7 +14,7 @@ The real-time phase reads the cctv footage, identifies clips of interest and per
 
     \item \textbf{Background Masking}
 
-	A foreground extractor like a Mixture of Gaussians is used to extract the subjects of interests in the clips identified by motion detection.
+	A foreground extractor like a Mixture of Gaussians\ref{bouttefroy2010guassian}, \ref{poisson2003} is used to extract the subjects of interests in the clips identified by motion detection.
     The same technique used in previous step is also employed here to generate foreground masks and thereby just extracting the foreground. Several techniques were experimented on and it turns MOG is the best cost effective and accurate technique available for our specific needs.
 
     \item \textbf{Computation of Objects flow-tubes}
@@ -44,7 +44,7 @@ The query phase processes the user input query, extracts the relevant tubes and 
     This stage is easily implemented by writing logic to create a query with all the parameters the user specifies in the input query.
 
     \item \textbf{Rearrangement}
-    An optimisation algorithm, in our case simulated annealing, is used to rearrange the flow-tubes in the time dimension to produce a summary of the desired length.
+    An optimisation algorithm, in our case simulated annealing\ref{xinyao2007sa}, is used to rearrange the flow-tubes in the time dimension to produce a summary of the desired length.
 
     While there are several heuristic based search algorithms are recommended for these purposes by different authors, simulated annealing remains to be the most successful and most popularly cited method. Hence, we have implemented simulated annealing with a custom cost function based on our needs.
 
@@ -53,7 +53,7 @@ The query phase processes the user input query, extracts the relevant tubes and 
     A weighted approach, with the periods where there is most activity, is considered more heavily in generating the time-lapsed background.
 
     \item \textbf{Blending}
-    Poisson blending is used to blend the rearranged flow-tubes with the time-lapsed background to generate the summary we require. This summary is then saved onto the user’s computer.
+    Poisson blending\ref{richard2011pb} is used to blend the rearranged flow-tubes with the time-lapsed background to generate the summary we require. This summary is then saved onto the user’s computer.
 \end{itemize}
 
 \section{Summary}
