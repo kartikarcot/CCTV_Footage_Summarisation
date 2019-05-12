@@ -2,6 +2,7 @@
 import numpy as np
 import cv2
 from timeit import default_timer as timer
+import skimage.measure
 
 
 # user imports
@@ -11,6 +12,7 @@ import tubes as tb
 import optimize as op
 import blend as bd
 import detector as dtct
+
 class VideoSummary(object):
 
     def __init__(self):
@@ -49,7 +51,7 @@ class VideoSummary(object):
         """
         Reads a video file
 
-        Args: none
+        Args: fiilename
 
         Returns: a list of frames; frames are 2D numpy arrays
         """
@@ -62,6 +64,43 @@ class VideoSummary(object):
         except IOError as error:
             print(error)
             print('Check the filename or camera.')
+
+        # read specific frame
+        # cap.set(cv2.CV_CAP_PROP_POS_FRAMES, frame_number-1)
+
+        while True:
+            ret, frame = cap.read()
+
+            # frame was read properly, not end of file
+            if ret is True:
+                video.append(frame)
+            else:
+                break
+
+        return video
+
+    def read_file_continuous(self, filename, start_frame):
+        """
+        Reads a video file, from a specified start frame
+
+        Args: filename, start frame
+
+        Returns: a list of frames; frames are 2D numpy arrays
+                end frame: frame number of the last frame which was read
+                is_end: indicates end of the file
+        """
+
+        video = []
+
+        # open input video using videoCapture
+        try:
+            cap, frame_width, frame_height = self.open_file(filename)
+        except IOError as error:
+            print(error)
+            print('Check the filename or camera.')
+
+        # read specific frame
+        # cap.set(cv2.CV_CAP_PROP_POS_FRAMES, frame_number-1)
 
         while True:
             ret, frame = cap.read()
@@ -153,9 +192,13 @@ class VideoSummary(object):
 
 if __name__ == '__main__':
     vid_sum = VideoSummary()
-    video = vid_sum.read_file('../videos/1min3.mp4')
+    video = vid_sum.read_file('../videos/4min1.mp4')
 
     print("Done loading video")
+
+    # print(np.shape(video[1]))
+    # fr = skimage.measure.block_reduce(np.asarray(video), (1,4,4,1), np.max)
+    # print(np.shape(fr))
 
     # start = timer()
     # bg = background.create_background_parallel(video[0:200], 151)
@@ -196,8 +239,6 @@ if __name__ == '__main__':
     tubes = tb.create_object_tubes(video, tubes)
     print("\ndone creating color and masked tubes")
 
-    bd.add_timestamp(tubes[0]['color_tube'][10], tubes[0]['tube'][10], 100)
-
     config = "../Yolo/yolov3.cfg"
     weights = "../Yolo/yolov3.weights"
     labels = "../Yolo/coco.names"
@@ -211,7 +252,8 @@ if __name__ == '__main__':
     print(str(len(all_tags)) +  " tags found:")
     for i in range(0, len(all_tags)):
         print(str(i+1) + ". " + all_tags[i])
-    user_query = input("Select the required tags (comma separated numbers): ")
+    # user_query = input("Select the required tags (comma separated numbers): ")
+    user_query = "1"
     user_query_list = user_query.split(',')
 
     generated_query = []
@@ -223,7 +265,7 @@ if __name__ == '__main__':
     print(generated_query)
 
     #sample query
-    query = {'tags':['motorbike', 'bicycle'], 'start':None, 'end':None, 'syn_length':None}
+    query = {'tags': ['car', 'motorbike', 'person'], 'start':None, 'end':None, 'syn_length':None}
     selected_tubes = detObj.select_tubes(tubes, query)
     print("selected tubes are " + str(len(selected_tubes)))
 
@@ -232,16 +274,25 @@ if __name__ == '__main__':
     # exit() #remove this to continue with simulated annealing
 ################################################################################################################################
 
+    ############
+    # selected_tubes = tubes
+    ############
+
     for i in range(0, len(selected_tubes)):
         vid_sum.write_file(selected_tubes[i]['color_tube'], "filename{}.avi".format(i))
 
 
-    anneal = op.SimulatedAnnealing(10000, 1, 20, 3)
+    anneal = op.SimulatedAnnealing(10000, 1, 500, 3)
     tube_dict = {}
 
+
+    prev_len = 0
     for i,tube in enumerate(selected_tubes):
         # volume, start time (initialize it to 0), length, actual start time
-        tube_dict[i] = [np.asarray(tube['color_tube']), 0, len(tube['color_tube']), tube['start']]
+        tube_dict[i] = [np.asarray(tube['color_tube']), prev_len, len(tube['color_tube']), tube['start']]
+        prev_len = prev_len + len(tube['color_tube'])
+
+        print(np.shape(tube_dict[i][0]))
 
     '''
     tube_dict = { 1: [a, 0, 50],

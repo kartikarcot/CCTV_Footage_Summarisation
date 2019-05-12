@@ -2,6 +2,7 @@ import numpy as np
 from multiprocessing import Pool
 import cv2
 from tqdm import tqdm
+
 def create_background(video, buf_size):
     """
     Creates the background of clip using temporal median

@@ -1,64 +1,70 @@
 import numpy as np
 import cv2
 
-def detect_motion(video):
-    """
-    Detect motion  and create a FG mask using MOG2
+class MotionDetect(object):
 
-    Args: input video; 3 channels
+    def __init__(self):
+        self.fgbg = cv2.createBackgroundSubtractorMOG2()
+        # kernel for morphological operations
+        self.kernel1 = np.ones((3,3),np.uint8)
+        self.kernel2 = np.ones((5,5),np.uint8)
 
-    Returns: masked video; greyscale image (single channel) &
-        calculated static background
-    """
+    def detect_motion(self, frame):
+        """
+        Detect motion  and create a FG mask using MOG2
 
-    output = []
-    bg = []
+        Args: input frame; 3 channels
 
-    frame_width = int(np.shape(video)[2])
-    frame_height = int(np.shape(video)[1])
+        Returns: masked frame (greyscale image, single channel) &
+            calculated static background frame,
+            is_motion - whether motion is detected in this frame or not
+        """
+        frame_width = int(np.shape(frame)[1])
+        frame_height = int(np.shape(frame)[0])
 
-    # create background subtractor
-    fgbg = cv2.createBackgroundSubtractorMOG2()
-    # fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
+        # create background subtractor
+        # fgbg = cv2.createBackgroundSubtractorMOG2()
+        # fgbg = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 
-    # kernel for morphological operations
-    kernel1 = np.ones((3,3),np.uint8)
-    kernel2 = np.ones((5,5),np.uint8)
 
-    for i in range(0, len(video)):
 
-        # read the frame
-        frame = video[i]
 
         # apply the mask to the frame
-        fgmask = fgbg.apply(frame)
+        fgmask = self.fgbg.apply(frame)
 
         # remove shadow
         fgmask[fgmask != 255] = 0
 
+        # if (np.sum(fgmask)/255 >5000):
+        #     cv2.imshow("window0", fgmask)
+        #     cv2.waitKey(0)
+        #     cv2.destroyAllWindows()
+
         # remove small noise
-        img = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel1)
-        # img = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel1)
+        img = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel1)
+        # img = cv2.morphologyEx(img, cv2.MORPH_OPEN, self.kernel1)
 
         # if (np.sum(img)/255 >5000):
         #     cv2.imshow("window1", img)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
+        #     cv2.waitKey(0)
+        #     cv2.destroyAllWindows()
 
         # dilate to get larger blob
-        img = cv2.dilate(img, kernel2, iterations = 1)
+        img = cv2.dilate(img, self.kernel2, iterations = 1)
 
         ########### COOOL
 
         # finds components in the image and suppresses the components
         # which are smaller than the threshold to eliminate small patches
-
-        threshold = frame_width * frame_height / 80
-
+        # print("height is " + str(frame_height))
+        # print("width is " + str(frame_width))
+        threshold = frame_width * frame_height / 50
+        # print("threshold is " + str(threshold))
         count, img = cv2.connectedComponents(img, connectivity=8)
 
         unique, count = np.unique(img, return_counts=True)
         for i in range(0, len(count)):
+            # print(str(unique[i]) + " " + str(count[i]))
             if count[i] < threshold:
                 img[img == unique[i]] = 0
 
@@ -72,23 +78,20 @@ def detect_motion(video):
         #     cv2.imshow("window2", img)
 
         # dilate to get larger blob
-        img = cv2.dilate(img, kernel2, iterations = 3)
+        img = cv2.dilate(img, self.kernel2, iterations = 3)
 
-        # if (np.sum(img)/255 >5000):
+        # if (np.sum(img)/255 >threshold):
         #     cv2.imshow("window3", img)
-
-        output.append(img)
-
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
+        #     cv2.waitKey(0)
+        #     cv2.destroyAllWindows()
 
         # Get the background image from the model
-        bg_img = fgbg.getBackgroundImage()
-        bg.append(bg_img)
+        bg_img = self.fgbg.getBackgroundImage()
 
-    # Trim the first few seconds of the BG video
-    # Since it takes a few seconds for BG to normalize / become correct & static
-    bg = bg[150:] # skip the first 5 secs
+        is_motion = False
 
-    return output, bg
+        # check if there are any white pixels in the mask
+        if (np.sum(img) > 0):
+            is_motion = True
+
+        return img, bg_img, is_motion

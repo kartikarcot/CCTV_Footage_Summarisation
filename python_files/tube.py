@@ -1,5 +1,55 @@
 import numpy as np
 import cv2
+import file_system as fs
+import random
+
+
+class Tube(object):
+    """
+    A tube object contains all the parameters and volumes associated with an event aka tube
+
+    Attributes:
+        object_tube: list of frames [4 dimensional]; Only the detected object is masked out
+        mask_tube: list of frames [3 dimensional]; The B&W mask of the detected object
+        start: actual start frame of the tube
+        end: actual end frame of the tube
+        length: length of the tube (given by end-start)
+    """
+    def __init__(self, object_tube = [], mask_tube = [], start = 0, end = 0, length = 0):
+            self.object_tube = object_tube
+            self.mask_tube = mask_tube
+            self.start = start
+            self.end = end
+            self.length = length
+            self.tags = None
+
+            return
+
+    def create_object_tube(self, video):
+        """
+        Creates a color object tube of the object by applying the mask_tube
+        onto the original input video
+
+        Args:
+            video: list of frames (3 channel); the original input video
+        """
+
+        self.object_tube = []
+
+        for i in range(0, self.length):
+
+            # mask has to be converted to 3 channel for bitwise operation
+            mask_3c = cv2.cvtColor(self.mask_tube[i], cv2.COLOR_GRAY2BGR)
+            video_frame = video[self.start + i]
+
+            # use 'bitwise and' operation to apply the object mask onto the input video
+            color_frame = cv2.bitwise_and(video_frame, mask_3c)
+            self.object_tube.append(color_frame)
+
+        # fs.write_file(self.object_tube, "../debug/objecttube" + str(random.randint(1,100)) + ".avi")
+
+        return
+
 
 def binary_mask(img, val, replacement_val):
     """
@@ -18,7 +68,7 @@ def binary_mask(img, val, replacement_val):
     return
 
 def intersecting_regions(cur_img, cur_count, prev_img, prev_labels,
-                            intersection_threshold = 0.2):
+                        intersection_threshold = 0.2):
 
     """
     Find the number of intersecting regions between the any region in the
@@ -91,6 +141,70 @@ def intersecting_regions(cur_img, cur_count, prev_img, prev_labels,
 
     return multiple_intersections, match_dict
 
+def extract_tubes(labelled_volume):
+    """
+    Extracts mask tubes of each event from a single labelled volume
+
+    Args:
+        labelled_volume: list of frames;
+            In each frame, pixel value = 0 represents BG,
+            while non-zero pixel values represent the corresponding event
+
+    Returns:
+        A list of Tube objects with the mask tube extracted,
+        start frame, end frame and length attributes set
+    """
+
+    # threshold of active pixels for tubes to be extracted
+    THRESHOLD = 10000
+
+    tubes = [] # list of tube objects
+
+    # get the unique labels within the volume
+    uniq, count = np.unique(labelled_volume, return_counts = True)
+
+    # skip label 0, since it represents the BG (OpenCV connected components output)
+    for i in range(1, len(uniq)):
+
+        # skip tubes where the active pixel count is less, it is probably noise
+        if count[i] < THRESHOLD:
+            print("Skipped " + str(count[i]))
+            continue
+
+        # Create a new tube object
+        tube = Tube()
+        tube.mask_tube = []
+
+        curr_label = uniq[i] # current label
+
+        # set the start and end of this tube to be start and end of video
+        start_extraction = False
+        tube.start = 0
+        tube.end = len(labelled_volume)
+
+        # iterate through frames and set actual start & end point
+        for frame_no, frame in enumerate(labelled_volume):
+            if (not start_extraction and frame[frame==curr_label].any()):
+                start_extraction = True
+                tube.start = frame_no
+            if (start_extraction and not frame[frame==curr_label].any()):
+                tube.end = frame_no
+                tube.length = tube.end - tube.start
+                break
+
+            if start_extraction is True:
+                # we require a new frame
+                frame_copy = frame.copy()
+                frame_copy[frame_copy==curr_label] = 255
+                frame_copy[frame_copy!=255] = 0
+                frame_copy = frame_copy.astype(np.uint8)  # make sure type is uint8
+                tube.mask_tube.append(frame_copy)
+
+        tubes.append(tube)
+        # fs.write_file(tube.mask_tube, "../debug/masktube" + str(random.randint(1,100)) + ".avi")
+
+    return tubes
+
 def label_tubes(video_mask):
     """
     Detects and labels the tubes aka events in the masked video
@@ -143,49 +257,24 @@ def label_tubes(video_mask):
         cur_img_output = cur_img.copy()
 
         if ret is True:
-            # Some current region is intersecting with multiple previous regions
+            # There are intersecting regions
+            # Overwrite matching labels in the volume with current label
+            tube_num += 1
 
-            cur_img_copy = cur_img.copy()
+            for region in match_dict:
+                if len(match_dict[region]) > 1:
 
-            # Erode the image to try and separate the regions
-            kernel = np.ones((3,3), np.uint8)
-            cur_img_copy = cv2.erode(cur_img_copy, kernel, iterations = 1)
+                    for index in match_dict[region]:
+                        for frame in volume:
+                            # Update labels of tubes in previous frame
+                            frame[frame == index] = tube_num
+                            # Add an entry to the overwrite dict
+                            overwrite_dict[index] = [tube_num]
 
-            cur_count_copy, cur_img_copy = cv2.connectedComponents(cur_img_copy, connectivity=8)
-
-            # Find the number of intersections using eroded image
-            ret, match_dict_copy = intersecting_regions(cur_img_copy, cur_count_copy, volume[-1], labels[-1])
-
-
-            # print("intersection " + str(ret) + str(match_dict_copy))
-
-            if ret is False:
-                # print("erosion success")
-                # The intersecting regions have been separated by erosion
-                # Replace the image by the eroded image
-                cur_img = cur_img_copy
-                cur_count = cur_count_copy
-                match_dict = match_dict_copy
-            else:
-                # The intersecting regions did not separate
-                # Overwrite matching labels in the volume with current label
-
-                tube_num += 1
-
-                for region in match_dict:
-                    if len(match_dict[region]) > 1:
-
-                        for index in match_dict[region]:
-                            for frame in volume:
-                                # Update labels of tubes in previous frame
-                                frame[frame == index] = tube_num
-                                # Add an entry to the overwrite dict
-                                overwrite_dict[index] = [tube_num]
-
-                        # Update the dict
-                        match_dict[region] = [tube_num]
-    #                     cur_img[cur_img == region] = tube_num
-    #                     cur_label.append(tube_num)
+                    # Update the dict
+                    match_dict[region] = [tube_num]
+#                     cur_img[cur_img == region] = tube_num
+#                     cur_label.append(tube_num)
 
         # There are no intersection issues; Proceed normally
         for region in match_dict:
@@ -206,8 +295,6 @@ def label_tubes(video_mask):
         labels.append(cur_label) # Convert keys in the match_dict to a list of labels of current image
         prev_count = cur_count
 
-
-
     # Update previous frames
     # print(overwrite_dict)
     # for index in overwrite_dict:
@@ -220,92 +307,3 @@ def label_tubes(video_mask):
 
     return volume
 
-def extract_tubes(labelled_volume):
-    """
-    Extracts each tube into individual volumes
-    """
-
-    # threshold of active pixels for tubes to be extracted
-    THRESHOLD = 10000
-
-    tubes = [] # list of volumes
-
-    # get the unique labels within the volume
-    uniq, count = np.unique(labelled_volume, return_counts = True)
-
-    # skip label 0, since it represents the BG (OpenCV connected components output)
-    for i in range(1, len(uniq)):
-
-        # skip tubes where the active pixel count is less, it is probably noise
-        if count[i] < THRESHOLD:
-            print("Skipped " + str(count[i]))
-            continue
-
-        tube = []   # tube of current object
-        # labelled_vol_copy = labelled_volume.copy()
-        label = uniq[i] # current label
-
-        start=False
-        start_frame = 0
-        end_frame = len(labelled_volume)
-
-        for frameno, frame in enumerate(labelled_volume):
-            frame_copy = frame.copy()
-            if(not start and frame_copy[frame_copy==label].any()):
-                start = True
-                start_frame = frameno
-            if(start and not frame_copy[frame_copy==label].any()):
-                end_frame = frameno
-                break
-
-            if start is True:
-                frame_copy[frame_copy==label] = 255
-                frame_copy[frame_copy!=255] = 0
-                frame_copy = frame_copy.astype(np.uint8)  # make sure type is uint8
-                tube.append(frame_copy)
-
-        # end_frame = start_frame + len(tube)
-        tubeStruc = {"start":start_frame, "end":end_frame, "tube":tube}
-        tubes.append(tubeStruc)
-
-    return tubes
-
-def create_object_tubes(video, tubes):
-
-    color_tubes = []
-    masked_tubes = []
-
-    # print("Shape of tube :" + str(np.shape(tubes[1])))
-    print("video length is " + str(len(video)))
-    # i represents current tube being processed
-    for i in range(0, len(tubes)):
-
-        color_tube = []
-        masked_tube = []
-        tube = tubes[i]["tube"]
-        start_frame = tubes[i]["start"]
-        # j represents the current frame in the tube being processed (i)
-        print("start: "+str(tubes[i]['start']))
-        print("length: "+str(tubes[i]['end']-tubes[i]['start']))
-        print(len(tube))
-        for j in range(0, len(tube)):
-
-            active_pixels = int(np.sum(tube[j])/255)
-
-            # only consider frames with events/activity
-            if active_pixels > 0:
-                ###########
-                # kernel2 = np.ones((7,7),np.uint8)
-                # tube[j] = cv2.dilate(tube[j], kernel2,iterations = 1)
-                ###########
-
-                #mask has to be converted to 3 channel for bitwise operation
-                color_frame = cv2.bitwise_and(video[start_frame + j], cv2.cvtColor(tube[j],cv2.COLOR_GRAY2BGR))
-                color_tube.append(color_frame)
-                masked_tube.append(tube[j])
-
-        # color_tubes.append(color_tube)
-        # masked_tubes.append(masked_tube)
-        tubes[i]["color_tube"] = color_tube
-
-    return tubes

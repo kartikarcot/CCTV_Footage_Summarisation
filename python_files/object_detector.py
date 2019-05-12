@@ -29,7 +29,7 @@ class Object_Detector(object):
 
     def detect_object(self, image):
         (H, W) = image.shape[:2]
-        cv2.imwrite("readImage.jpg", image)
+        # cv2.imwrite("readImage.jpg", image)
         # construct a blob from the input image and then perform a forward
         # pass of the YOLO object detector, giving us our bounding boxes and
         # associated probabilities
@@ -95,24 +95,16 @@ class Object_Detector(object):
         # print("names are " + str(names))
         return set(names)
 
-    def add_tags(self, tubes, step=20):
+    def add_tags(self, tube, step=7):
 
-        for tube in tubes:
-            length = len(tube['color_tube'])
-            tube['tags'] = set()
-            for inc in range(0,length,step):
-                frame  = tube['color_tube'][int(inc)]
-                tube['tags'] = tube['tags'].union(self.return_tags(frame))
+        tags = set()
+        for inc in range(0, tube.length, step):
+            frame = tube.object_tube[int(inc)]
+            tags = tags.union(self.return_tags(frame))
 
-                # cv2.imshow("selected frame", frame)
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
-            # print("tags are " + str(tube['tags']))
-                # if('bicycle' in tube['tags']):
-                #     idxs, boxes, confidences, classIDs = self.detect_object(frame)
-                #     self.draw_boxes(idxs, boxes, confidences, classIDs, frame)
+        tube.tags = tags
 
-        return tubes
+        return
 
 
     def draw_boxes(self, idxs, boxes, confidences, classIDs, image):
@@ -159,7 +151,7 @@ class Object_Detector(object):
         all_tags = set()
 
         for i, tube in enumerate(tubes):
-            all_tags = all_tags.union(tube['tags'])
+            all_tags = all_tags.union(tube.tags)
 
         return list(all_tags)
 
