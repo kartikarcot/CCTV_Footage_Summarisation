@@ -17,7 +17,7 @@ import object_detector as od
 import file_system as fs
 import database as db
 
-SEGMENT_LENGTH = 500
+SEGMENT_LENGTH = 400
 
 def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iterations, obj_det, filename, clip_tags):
 
@@ -47,11 +47,6 @@ def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iteration
             is_video_processing = False
 
 
-    # print("\nAfter loading video frames")
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
-
     print("\nmotion mask length: " + str(len(motion_mask)))
     # fs.write_file(motion_mask, "../debug/motionmask.avi")
     print("Started processing")
@@ -60,37 +55,18 @@ def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iteration
     labelled_volume  = tb.label_tubes(motion_mask)
     print("done labelling tubes")
 
-    # print("\nAfter labelling tubes")
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
-
     tubes = tb.extract_tubes(labelled_volume)
     print("done extracting tubes")
-
-    # print("\nAfter extracting tubes")
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
 
     # added color tube into each tube dictionary in the list
     for tube in tubes:
         tube.create_object_tube(video)
         print("done creating color tubes")
-        # fs.write_file(tube.object_tube, "../debug/objecttube" + str(random.randint(1,100)) + ".avi")
-
-    # print("\nAfter creating color tubes")
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
+        fs.write_file(tube.object_tube, "../debug/objecttube_" + filename + str(random.randint(1,100)) + ".avi")
 
     for tube in tubes:
         obj_det.add_tags(tube)
 
-    # print("\nAfter adding tags")
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
 
     for tube in tubes:
         tube.start = tube.start + completed_iterations * SEGMENT_LENGTH
@@ -100,11 +76,6 @@ def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iteration
     db.create_connection()
     db.save_tubes(tubes, filename)
 
-    # print("\nAfter saving tubes")
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
-
     # save background
     fs.write_file(bg, "../storage/background_" +
         filename + "_" + str(completed_iterations) + ".avi")
@@ -112,23 +83,6 @@ def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iteration
     all_tags = obj_det.get_all_tags(tubes)
     print("all_tags: " + str(all_tags))
     print("cur frame: " + str(cur_frame))
-
-    # reset
-    # cur_segment_len = 0
-
-    # for it in range(0, len(video)):
-    #     video[it] = None
-    #     motion_mask[it] = None
-    # # motion_mask = []
-    # # video = []
-    # tubes = []
-    # # bg = []
-
-
-    # print("After clear:")
-    # all_objects = muppy.get_objects()
-    # sum1 = summary.summarize(all_objects)
-    # summary.print_(sum1)
 
     # fs.write_file(video, "../debug/video" + str(random.randint(1,100)) + ".avi")
 

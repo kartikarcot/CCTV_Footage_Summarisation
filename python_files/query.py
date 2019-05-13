@@ -1,5 +1,7 @@
 import numpy as np
 import cv2
+from random import uniform, random
+
 import database as db
 import optimize as op
 import blend as bd
@@ -76,19 +78,26 @@ if __name__ == '__main__':
     vid_sum = VideoSummary()
 
     db.create_connection()
-    selected_tubes = db.get_tubes_by_query(filename, 000, 25000, ['car'], 30)
+    selected_tubes = db.get_tubes_by_query(filename, 0, 15000, ['car', 'person'], 30)
     phase1_iterations = db.get_clip_iterations(filename)
 
     print("Iterations: " + str(phase1_iterations))
 
-    anneal = op.SimulatedAnnealing(1000, 100, 10, 5)
+    anneal = op.SimulatedAnnealing(100, 1, 100, 5)
     tube_dict = {}
 
+
+    total_tube_len = 0
+    for i,tube in enumerate(selected_tubes):
+        total_tube_len += tube.length
 
     prev_len = 0
     for i,tube in enumerate(selected_tubes):
         # volume, start time (initialize it to 0), length, actual start time
-        tube_dict[i] = [np.asarray(tube.object_tube), 0, tube.length, tube.start]
+        # tube_dict[i] = [np.asarray(tube.object_tube), 0, tube.length, tube.start]
+
+        # try random start times within a given bound
+        tube_dict[i] = [np.asarray(tube.object_tube), int(uniform(0, 1) * total_tube_len * 0.75), tube.length, tube.start]
         # prev_len = prev_len + len(tube['color_tube'])
 
         # print(np.shape(tube_dict[i][0]))
@@ -99,7 +108,7 @@ if __name__ == '__main__':
         3: [b, 0, 50],
     }
     '''
-    tube_dict = anneal.run(tube_dict)
+    tube_dict = anneal.run(tube_dict, total_tube_len)
     for i,key in enumerate(tube_dict):
         print(tube_dict[key][1:])
 
@@ -113,7 +122,7 @@ if __name__ == '__main__':
     for i in range(1, phase1_iterations):
         fs.read_file("../storage/background_" + filename + "_" + str(i) + ".avi", bg)
 
-        if i > 4:
+        if i > 8:
             break
 
     summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)

@@ -156,7 +156,7 @@ def extract_tubes(labelled_volume):
     """
 
     # threshold of active pixels for tubes to be extracted
-    THRESHOLD = 10000
+    THRESHOLD = 20000
 
     tubes = [] # list of tube objects
 

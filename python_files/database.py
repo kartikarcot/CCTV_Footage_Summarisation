@@ -19,6 +19,8 @@
 from mongoengine import *
 import datetime
 import uuid
+import datetime
+
 import numpy as np
 import tube as tb
 
@@ -26,6 +28,7 @@ FILEPATH = "../storage/"
 
 ################
 class TubeDB(Document):
+    created_date = DateTimeField()
     clip_name = StringField(max_length=50)
     tube_id = StringField(max_length=100)
     start = IntField()
@@ -34,6 +37,7 @@ class TubeDB(Document):
     tags = ListField(StringField(max_length=20))
 
 class Clip(Document):
+    created_date = DateTimeField()
     clip_name = StringField(max_length=50)
     length = IntField()
     iterations = IntField()
@@ -64,6 +68,7 @@ def save_tubes(tubes, clip_name):
         tube_id = str(uuid.uuid1())
 
         tubedb = TubeDB()
+        tubedb.created_date = datetime.datetime.now()
         tubedb.clip_name = clip_name
         tubedb.tube_id = tube_id
         tubedb.start = tube.start
@@ -83,6 +88,7 @@ def save_tubes(tubes, clip_name):
 def save_clip(clip_name, length, tags, iterations):
     # save the clip details
     clip = Clip()
+    clip.created_date = datetime.datetime.now()
     clip.clip_name = clip_name
     clip.length = length
     clip.iterations = iterations
@@ -97,7 +103,7 @@ def get_clips():
     """
     clips = []
     for clip in Clip.objects():
-        clips.append(str(clip_name))
+        clips.append(str(clip.clip_name))
 
     return clips
 
