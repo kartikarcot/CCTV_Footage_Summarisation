@@ -44,7 +44,7 @@ class MotionDetect(object):
         img = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, self.kernel1)
         # img = cv2.morphologyEx(img, cv2.MORPH_OPEN, self.kernel1)
 
-        # if (np.sum(img)/255 >5000):
+        # if (np.sum(img)/255 >100):
         #     cv2.imshow("window1", img)
         #     cv2.waitKey(0)
         #     cv2.destroyAllWindows()
@@ -58,7 +58,7 @@ class MotionDetect(object):
         # which are smaller than the threshold to eliminate small patches
         # print("height is " + str(frame_height))
         # print("width is " + str(frame_width))
-        threshold = frame_width * frame_height / 50
+        threshold = frame_width * frame_height / 200
         # print("threshold is " + str(threshold))
         count, img = cv2.connectedComponents(img, connectivity=8)
 
@@ -80,7 +80,7 @@ class MotionDetect(object):
         # dilate to get larger blob
         img = cv2.dilate(img, self.kernel2, iterations = 3)
 
-        # if (np.sum(img)/255 >threshold):
+        # if (np.sum(img)/255 >0):
         #     cv2.imshow("window3", img)
         #     cv2.waitKey(0)
         #     cv2.destroyAllWindows()

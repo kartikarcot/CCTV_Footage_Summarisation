@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import file_system as fs
 import random
-
+import copy
 
 class Tube(object):
     """
@@ -67,7 +67,7 @@ def binary_mask(img, val, replacement_val):
     img[img == val] = replacement_val # Pixels equal to the required value are set to replacement value
     return
 
-def intersecting_regions(cur_img, cur_count, prev_img, prev_labels,
+def intersecting_regions(cur_img, cur_count, prev_img_list, prev_labels,
                         intersection_threshold = 0.2):
 
     """
@@ -80,7 +80,7 @@ def intersecting_regions(cur_img, cur_count, prev_img, prev_labels,
 
         cur_count: Number of components in cur_img
 
-        prev_img: The labelled image of the previous frame returned by OpenCV
+        prev_img_list: The labelled images of the last few previous frame returned by OpenCV
             Connected Components
 
         prev_labels: The tube labels present in the prev_img
@@ -99,7 +99,7 @@ def intersecting_regions(cur_img, cur_count, prev_img, prev_labels,
 
 
     # Create a copy of the images to prevent overwriting the parameters
-    prev_img = prev_img.copy()
+    prev_img_list = copy.deepcopy(prev_img_list)
     cur_img = cur_img.copy()
 
     match_dict = {} # Dictionary to store the intersecting regions
@@ -112,32 +112,38 @@ def intersecting_regions(cur_img, cur_count, prev_img, prev_labels,
         # Create a copy of the image for this iteration
         cur_img_copy = cur_img.copy()
         binary_mask(cur_img_copy, region_cur, 1)
-
+        match_found = False
         matches = [] # Clear matches list for each region in current image
 
-        for region_prev in prev_labels:
+        for i in range(0, len(prev_labels)):
 
-            # Create a copy of the image for this iteration
-            prev_img_copy = prev_img.copy()
-            binary_mask(prev_img_copy, region_prev, 1)
+            for region_prev in prev_labels[i]:
 
-            # Multiply masks to find the intersections of regions
-            intersection = prev_img_copy * cur_img_copy
+                # Create a copy of the image for this iteration
+                prev_img_copy = prev_img_list[i].copy()
+                binary_mask(prev_img_copy, region_prev, 1)
 
-            # Number of intersecting pixels
-            intersection_count = np.sum(intersection)
+                # Multiply masks to find the intersections of regions
+                intersection = prev_img_copy * cur_img_copy
 
-            # Number of pixels in previous region
-            region_prev_count = np.sum(prev_img_copy)
+                # Number of intersecting pixels
+                intersection_count = np.sum(intersection)
 
-            # Region is matched if intersection fraction greater than threshold
-            if intersection_count/region_prev_count > intersection_threshold:
-                matches.append(region_prev)
+                # Number of pixels in previous region
+                region_prev_count = np.sum(prev_img_copy)
 
-        if len(matches) > 1:
-            multiple_intersections = True
+                # Region is matched if intersection fraction greater than threshold
+                if intersection_count/region_prev_count > intersection_threshold:
+                    matches.append(region_prev)
+                    match_found = False
+                    break
+            if match_found:
+                break
 
-        match_dict[region_cur] = matches
+            if len(matches) > 1:
+                multiple_intersections = True
+
+            match_dict[region_cur] = matches
 
     return multiple_intersections, match_dict
 
@@ -156,7 +162,7 @@ def extract_tubes(labelled_volume):
     """
 
     # threshold of active pixels for tubes to be extracted
-    THRESHOLD = 20000
+    THRESHOLD = 10000
 
     tubes = [] # list of tube objects
 
@@ -201,7 +207,7 @@ def extract_tubes(labelled_volume):
                 tube.mask_tube.append(frame_copy)
 
         tubes.append(tube)
-        # fs.write_file(tube.mask_tube, "../debug/masktube" + str(random.randint(1,100)) + ".avi")
+        fs.write_file(tube.mask_tube, "../debug/masktube" + str(random.randint(1,10000)) + ".avi")
 
     return tubes
 
@@ -250,14 +256,14 @@ def label_tubes(video_mask):
             # out.write(labeled_img)
         ###############################################################
 
-        ret, match_dict = intersecting_regions(cur_img, cur_count, volume[-1], labels[-1])
+        ret, match_dict = intersecting_regions(cur_img, cur_count, [volume[-1]], [labels[-1]])
 
         cur_label = []
 
         cur_img_output = cur_img.copy()
 
         if ret is True:
-            # There are intersecting regions
+            # There are multiple intersecting regions
             # Overwrite matching labels in the volume with current label
             tube_num += 1
 
@@ -285,7 +291,7 @@ def label_tubes(video_mask):
                 cur_label.append(tube_num)
 
             else:
-                # Some previous region was found, relabel the region
+                # only one previous region was found, relabel the region
                 cur_img_output[cur_img == region] = match_dict[region][0]
                 cur_label.append(match_dict[region][0])
 

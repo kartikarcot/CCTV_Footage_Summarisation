@@ -105,6 +105,11 @@ def write_file(video, filename):
 
         Returns: nothing
     """
+
+    if len(np.shape(video)) is 0:
+        print("Error writing file. No video frames.")
+        return
+
     frame_width = int(np.shape(video)[2])
     frame_height = int(np.shape(video)[1])
 

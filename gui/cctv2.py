@@ -8,9 +8,9 @@
 
 from PyQt4 import QtCore, QtGui
 
-import glob 
+import glob
 import cv2
-import re 
+import re
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -176,7 +176,7 @@ class Ui_MainWindow(object):
         self.label_10.setText(_translate("MainWindow", "m", None))
         self.label_3.setText(_translate("MainWindow", "Enter end time", None))
         self.label_11.setText(_translate("MainWindow", "s", None))
-        
+
         #setting input validations for time
         # regex = QtCore.QRegExp("[0-5][0-9] | [6][0]")
         # self.validator = QtGui.QRegExpValidator(regex,self)
@@ -213,7 +213,7 @@ class Ui_MainWindow(object):
 
     def cal_length(self):
         """
-        To calculate video length of input video using number of frames and fps. 
+        To calculate video length of input video using number of frames and fps.
         """
         x = self.comboBox.currentIndex()
         text = str(self.comboBox.currentText())
@@ -225,7 +225,7 @@ class Ui_MainWindow(object):
         # print(duration)
         self.hour = dur / 3600
         dur = dur % 3600
-        self.minute = dur / 60 
+        self.minute = dur / 60
         dur = dur % 60
         self.sec = dur
         time = "{}:{}:{}".format(int(self.hour),int(self.minute),int(self.sec))
@@ -235,16 +235,16 @@ class Ui_MainWindow(object):
     def press_generate(self):
         """
         1. Check if the entered start and end times are valid. If not, display a pop-up message.
-        2. Selects the checked tags. 
-        """   
+        2. Selects the checked tags.
+        """
 
 
-        #start time 
+        #start time
         h1 = self.lineEdit.text()
         m1 = self.lineEdit_3.text()
         sec1 = self.lineEdit_4.text()
 
-        #end time 
+        #end time
         h2 = self.lineEdit_2.text()
         m2 = self.lineEdit_5.text()
         sec2 = self.lineEdit_6.text()
@@ -252,31 +252,31 @@ class Ui_MainWindow(object):
         start_in_sec = int(h1) * 3600 + int(m1) * 60 + int(sec1)
         end_in_sec = int(h2) * 3600 + int(m2) * 60 + int(sec2)
         len_entered = end_in_sec - start_in_sec
-        
+
         self.popup = QtGui.QWidget()
 
         if int(h1) > self.hour:
-            warning = QtGui.QMessageBox.warning(self.popup, "Message", "Start time greater than length of video!") 
+            warning = QtGui.QMessageBox.warning(self.popup, "Message", "Start time greater than length of video!")
         elif len_entered > self.duration:
             warning = QtGui.QMessageBox.warning(self.popup, "Message", "Entered length bigger than video length!")
         elif (h2 < h1) or (h2 == h1 and m2 < m1) or (h2 == h1 and m2 == m1 and sec2 < sec1):
             warning = QtGui.QMessageBox.warning(self.popup, "Message", "Start time greater than end time!")
         else:
             print("Correctly entered")
-            
+
         tags = []
-        #selecting tags from checkboxes 
+        #selecting tags from checkboxes
         if self.checkBox.isChecked() == True:
             tags.append(self.checkBox.text())
         if self.checkBox_2.isChecked() == True:
             tags.append(self.checkBox_2.text())
         if self.checkBox_3.isChecked() == True:
             tags.append(self.checkBox_3.text())
-        
-        print(tags)    
 
-        #then use these tags to select tubes stored in the real-time phase. 
-            
+        print(tags)
+
+        # then use these tags to select tubes stored in the real-time phase.
+
 
 
 
@@ -289,7 +289,7 @@ if __name__ == "__main__":
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
-    ui.set_combobox() 
+    ui.set_combobox()
     ui.cal_length()
     ui.pushButton.clicked.connect(lambda:ui.press_generate())
     sys.exit(app.exec_())

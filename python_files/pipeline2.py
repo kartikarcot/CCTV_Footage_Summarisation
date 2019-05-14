@@ -41,7 +41,8 @@ def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iteration
 
         video.append(frame)
         motion_mask.append(mask_frame)
-        bg.append(bg_frame)
+        if cur_frame % 8 is 0:
+            bg.append(bg_frame)
 
         if cur_frame == vid_len:
             is_video_processing = False
@@ -62,10 +63,10 @@ def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iteration
     for tube in tubes:
         tube.create_object_tube(video)
         print("done creating color tubes")
-        fs.write_file(tube.object_tube, "../debug/objecttube_" + filename + str(random.randint(1,100)) + ".avi")
+        fs.write_file(tube.object_tube, "../debug/objecttube_" + filename + str(random.randint(1,10000)) + ".avi")
 
     for tube in tubes:
-        obj_det.add_tags(tube)
+        obj_det.add_tags(tube, 5)
 
 
     for tube in tubes:
@@ -91,7 +92,7 @@ def process_segment(cap, motionDetector, cur_frame, vid_len, completed_iteration
 if __name__ == '__main__':
 
     filepath = "../videos/"
-    filename = "8min1.mp4"
+    filename = "20min1.mp4"
     url = filepath + filename
 
     # open input video using videoCapture

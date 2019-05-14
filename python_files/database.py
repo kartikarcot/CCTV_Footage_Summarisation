@@ -107,6 +107,12 @@ def get_clips():
 
     return clips
 
+def get_num_clips():
+    """
+    Return number of clips that are stored in DB
+    """
+    return len(Clip.objects())
+
 def get_clip_iterations(clip_name):
     """
     Return clip iterations given clip name
@@ -114,6 +120,16 @@ def get_clip_iterations(clip_name):
     for clip in Clip.objects(clip_name=clip_name):
         # we expect only 1 clip of the given name
         return int(clip.iterations)
+
+    return 0
+
+def get_clip_length(clip_name):
+    """
+    Return clip iterations given clip name
+    """
+    for clip in Clip.objects(clip_name=clip_name):
+        # we expect only 1 clip of the given name
+        return int(clip.length)
 
     return 0
 

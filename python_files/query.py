@@ -1,6 +1,8 @@
 import numpy as np
 import cv2
 from random import uniform, random
+import os
+import subprocess
 
 import database as db
 import optimize as op
@@ -68,22 +70,25 @@ class VideoSummary(object):
         return summary
 
 
-
-if __name__ == '__main__':
+def generate_summary_by_query(filename="", tags=['person'], start_frame=0, end_frame=100000, min_length=30):
 
     # filepath = "../videos/"
-    filename = '8min1.mp4'
+
     # url = filepath + filename
 
     vid_sum = VideoSummary()
 
     db.create_connection()
-    selected_tubes = db.get_tubes_by_query(filename, 0, 15000, ['car', 'person'], 30)
+    selected_tubes = db.get_tubes_by_query(filename, start_frame, end_frame, tags, min_length)
     phase1_iterations = db.get_clip_iterations(filename)
 
-    print("Iterations: " + str(phase1_iterations))
+    print("Selected tube count: " + str(len(selected_tubes)))
 
-    anneal = op.SimulatedAnnealing(100, 1, 100, 5)
+    if len(selected_tubes) is 0:
+        print("No tubes found for given query!")
+        return
+
+    anneal = op.SimulatedAnnealing(25, 1, 70, 5)
     tube_dict = {}
 
 
@@ -94,10 +99,10 @@ if __name__ == '__main__':
     prev_len = 0
     for i,tube in enumerate(selected_tubes):
         # volume, start time (initialize it to 0), length, actual start time
-        # tube_dict[i] = [np.asarray(tube.object_tube), 0, tube.length, tube.start]
+        tube_dict[i] = [np.asarray(tube.object_tube), 0, tube.length, tube.start]
 
         # try random start times within a given bound
-        tube_dict[i] = [np.asarray(tube.object_tube), int(uniform(0, 1) * total_tube_len * 0.75), tube.length, tube.start]
+        # tube_dict[i] = [np.asarray(tube.object_tube), int(uniform(0, 1) * total_tube_len * 0.75), tube.length, tube.start]
         # prev_len = prev_len + len(tube['color_tube'])
 
         # print(np.shape(tube_dict[i][0]))
@@ -122,9 +127,28 @@ if __name__ == '__main__':
     for i in range(1, phase1_iterations):
         fs.read_file("../storage/background_" + filename + "_" + str(i) + ".avi", bg)
 
-        if i > 8:
-            break
+        # if i > 8:
+        #     break
 
     summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)
 
     fs.write_file(summary, "summary_vid.avi")
+
+    print("Done")
+
+    try:
+        cap, frame_width, frame_height = fs.open_file("summary_vid.avi")
+    except IOError as error:
+        print(error)
+        print('Check the filename or camera.')
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        cv2.imshow('summary', frame)
+        cv2.waitKey(30)
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    generate_summary_by_query(filename='test.mp4', tags=['car', 'person'], start_frame=0, end_frame=100000, min_length=30)

@@ -6,6 +6,8 @@ import copy
 
 import pandas as pd
 
+COLLISION_COST_WEIGHT = 0.4
+LENGTH_COST_WEIGHT = 0.6
 
 class SimulatedAnnealing(object):
     def __init__(self, Tmax, Tmin, num_epochs, num_iter):
@@ -14,7 +16,6 @@ class SimulatedAnnealing(object):
         self.num_epochs = num_epochs
         self.num_iter = num_iter
         self.grad_T = (self.Tmax - self.Tmin)/self.num_epochs
-        self._blah = 10
 
     def collision_cost(self, tube_dict, shift_dict):
         '''
@@ -35,13 +36,13 @@ class SimulatedAnnealing(object):
                 if i < j:
 
                     #find intersection
-                    start = max((shift_dict[key1]), (shift_dict[key2]))
-                    end = min((shift_dict[key1] + tube_dict[key1][2]), (shift_dict[key2] + tube_dict[key2][2]))
+                    start = max((tube_dict[key1][1] + shift_dict[key1]), (tube_dict[key2][1] + shift_dict[key2]))
+                    end = min((tube_dict[key1][1] + shift_dict[key1] + tube_dict[key1][2]), (tube_dict[key2][1] + shift_dict[key2] + tube_dict[key2][2]))
                     #if intersection is present
                     if(end > start):
                         #identify parts of tubes wrt 0 which will participate in intersection
-                        shift1 = tube_dict[key1][0][start - shift_dict[key1] : end - shift_dict[key1]]
-                        shift2 = tube_dict[key2][0][start - shift_dict[key2] : end - shift_dict[key2]]
+                        shift1 = tube_dict[key1][0][start - shift_dict[key1] - initial1 : end - shift_dict[key1] - initial1]
+                        shift2 = tube_dict[key2][0][start - shift_dict[key2] - initial2 : end - shift_dict[key2] - initial2]
 
                         intersection = shift1*shift2
                         int_sum = np.sum(intersection)/255
@@ -63,8 +64,8 @@ class SimulatedAnnealing(object):
         total_tube_len = 0
 
         for key in tube_dict:
-            start_values.append(shift_dict[key])
-            end_values.append(tube_dict[key][2] + shift_dict[key]) # length + start val
+            start_values.append(tube_dict[key][1] + shift_dict[key])
+            end_values.append(tube_dict[key][1] + tube_dict[key][2] + shift_dict[key]) # length + start val
             upper_limit += tube_dict[key][2]    # lengths
 
             if tube_dict[key][2] > lower_limit:
@@ -79,27 +80,58 @@ class SimulatedAnnealing(object):
         # print("LL: " + str(lower_limit))
         # print("Vid Len: " + str(vid_len))
 
+        if upper_limit > lower_limit:
+            len_cost = (vid_len - lower_limit) / (upper_limit - lower_limit)
+        else:
+            len_cost = upper_limit
 
-        len_cost = (vid_len - lower_limit) / (upper_limit - lower_limit)
+        len_cost = np.exp(5*(len_cost-1))
 
         if vid_len > upper_limit:
             return 10000
         else:
             return len_cost
 
-    def generate_config(self, tube_dict, Tmax, Tmin, T, max_length):
+    def generate_config(self, tube_dict, Tmax, Tmin, T):
 
         shift_dict = {}
 
         for i, key in enumerate(list(tube_dict.keys())):
 
-            shift_dict[key] = int(random.uniform(0, 1) * max_length * 0.5)
-
-            # if tube_dict[key][1] + shift_dict[key] < 0:
-            #     shift_dict[key] = -tube_dict[key][1]
+            ratio = (T-Tmin)/(Tmax-Tmin)
+            shift_dict[key] = int(random.uniform(-10, 10) * 30 * ratio)
 
 #         print(shift_dict)
         return shift_dict
+
+    def generate_initial_config(self, tube_dict, max_length):
+
+            shift_dict = {}
+
+            total_cost = 10000000
+
+            tube_dict_copy = copy.deepcopy(tube_dict)
+
+            for iters in range(0, 20):
+                # generate a random config
+                for i, key in enumerate(list(tube_dict.keys())):
+                    # set the initial position in tube_dict itself
+                    tube_dict[key][1] = int(random.uniform(0, 1) * max_length * 0.5)
+                    # set shift to 0
+                    shift_dict[key] = 0
+
+                # calc cost
+                c_cost = self.collision_cost(tube_dict, shift_dict)
+                l_cost = self.length_cost(tube_dict, shift_dict)
+                new_cost = (c_cost * COLLISION_COST_WEIGHT + l_cost * LENGTH_COST_WEIGHT) * 1000
+
+                if new_cost < total_cost:
+                    # update values
+                    for i, key in enumerate(list(tube_dict.keys())):
+                        tube_dict_copy[key][1] = tube_dict[key][1]
+
+    #         print(shift_dict)
+            return tube_dict_copy
 
 
 
@@ -109,11 +141,14 @@ class SimulatedAnnealing(object):
     def run(self, tube_dict_copy, max_length):
 
         tube_dict = copy.deepcopy(tube_dict_copy)
+
         for i, key1 in enumerate(list(tube_dict.keys())):
             print(np.shape(tube_dict_copy[key1][0]))
             print(np.shape(tube_dict[key1][0]))
             tube_dict[key1][0] = skimage.measure.block_reduce(np.asarray(tube_dict_copy[key1][0]), (1,4,4,1), np.max)
             print("shape of resized: " + str(np.shape(tube_dict[key1][0])))
+
+        tube_dict = self.generate_initial_config(tube_dict, max_length)
 
         print("start times")
         for key in tube_dict:
@@ -124,14 +159,15 @@ class SimulatedAnnealing(object):
         }
 
         T = self.Tmax
-        curr_config = self.generate_config(tube_dict, self.Tmax, self.Tmin, T, max_length)
-        curr_cost = (self.collision_cost(tube_dict, curr_config) * 0.8 + self.length_cost(tube_dict, curr_config) * 0.2) * 1000
+        curr_config = self.generate_config(tube_dict, self.Tmax, self.Tmin, T)
+        curr_cost = (self.collision_cost(tube_dict, curr_config) * COLLISION_COST_WEIGHT +
+            self.length_cost(tube_dict, curr_config) * LENGTH_COST_WEIGHT) * 1000
 
         for epoch in range(0, self.num_epochs):
             print("epoch " + str(epoch))
             for it in range (0, self.num_iter):
                 # print("iteration " + str(it))
-                new_config = self.generate_config(tube_dict, self.Tmax, self.Tmin, T, max_length)
+                new_config = self.generate_config(tube_dict, self.Tmax, self.Tmin, T)
 
                 # print("new config")
                 # print(new_config)
@@ -139,7 +175,7 @@ class SimulatedAnnealing(object):
                 print("length cost " + str(self.length_cost(tube_dict, new_config)))
                 c_cost = self.collision_cost(tube_dict, new_config)
                 l_cost = self.length_cost(tube_dict, new_config)
-                new_cost = (c_cost * 0.8 + l_cost * 0.2) * 1000
+                new_cost = (c_cost * COLLISION_COST_WEIGHT + l_cost * LENGTH_COST_WEIGHT) * 1000
 
                 delta = new_cost - curr_cost
                 # print ("\ndelta is " + str(delta))
@@ -162,7 +198,7 @@ class SimulatedAnnealing(object):
 
                     # Update the start times using shifts of new config
                     for key in tube_dict:
-                        tube_dict[key][1] = new_config[key]
+                        tube_dict[key][1] += new_config[key]
                     for key in tube_dict:
                         print(tube_dict[key][1:])
                 else:
@@ -188,7 +224,7 @@ class SimulatedAnnealing(object):
                         final_dict['Total cost'].append(new_cost/1000)
 
                         for key in tube_dict:
-                            tube_dict[key][1] = new_config[key]
+                            tube_dict[key][1] += new_config[key]
                         for key in tube_dict:
                             print(tube_dict[key][1:])
 
