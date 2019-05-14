@@ -11,42 +11,47 @@
 \usepackage{ragged2e}
 \usepackage{array}
 \usepackage{tocbibind}
-\usepackage[colorlinks=true,linkcolor=black]{hyperref}
+\usepackage[colorlinks=false]{hyperref}
 \usepackage[export]{adjustbox}
 \usepackage{rotfloat}
 \usepackage{fancyhdr}
 \usepackage{etoolbox}
 \usepackage{multicol}
-
+\usepackage[utf8]{inputenc}
+\usepackage{algorithm2e}
+\usepackage{amsmath}
+\usepackage{setspace}
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usetikzlibrary{decorations.pathmorphing}
+\usepackage{pgfplots}
+\usepackage{rotating}
+\usepackage[titles]{tocloft}
+\usepackage{xcolor}
+\usepackage{mathptmx}
 
 \graphicspath{ {./img/} }
+
+\renewcommand{\cftdot}{}
 
 \usepackage[toc,acronym]{glossaries}
 \makeglossaries
 
-\newacronym{urc}{URC}{University Rover Challenge}
-\newacronym{gps}{GPS}{Global Positioning System}
-\newacronym{ssh}{SSH}{Secure SHell}
-\newacronym{rgb}{RGB}{Red-Green-Blue}
-% \newacronym{RGB-D}{Red-Green-Blue-Depth}
-\newacronym{tcp}{TCP}{Transmission Control Protocol}
-\newacronym{udp}{UDP}{User Datagram Protocol}
-\newacronym{lan}{LAN}{Local Area Network}
-\newacronym{gui}{GUI}{Graphical User Interface}
-\newacronym{ir}{IR}{InfraRed}
-\newacronym{lidar}{LIDAR}{LIght Detection And Ranging}
-
-
+\newacronym{cctv}{CCTV}{Closed Circuit Television}
+\newacronym{mog}{MOG}{Mixture of Gaussians}
+\newacronym{yolo}{YOLO}{You Only Look Once}
+\newacronym{openCV}{OpenCV}{Open Computer Vision}
+\newacronym{rcnn}{RCNN}{Recurrent Convolutional Neural Network}
+\newacronym{dfd}{DFD}{Data Flow Diagrams}
+\newacronym{uml}{UML}{Unified Modelling Language}
+\newacronym{ssd}{SSD}{Single Shot Detector}
 
 \begin{document}
 \pagenumbering{gobble}
 
 \include{coverpages}
 
-% \printnoidxglossary[type=\acronymtype,title=Glossary]
+\printnoidxglossary[type=\acronymtype,title=Glossary]
 
 
 
@@ -54,16 +59,34 @@
 
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LEO]{Chapter \thechapter}
-\fancyhead[REO]{CCTV Video Summarisation}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{CCTV Video Summarisation}
 \fancyfoot[L]{Dept. of CSE, RVCE}
 \fancyfoot[C]{2018 - 2019}
 \fancyfoot[R]{\thepage}
-\renewcommand{\headrulewidth}{1.25pt}
-\renewcommand{\footrulewidth}{1.25pt}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\headrulewidth}{2pt}
+\renewcommand{\footrulewidth}{2pt}
+
+% \makeatletter
+% \def\headrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+% \hrule\@height\headrulewidth\@width\headwidth
+% \vskip 1.5pt% 1.5pt between lines
+% \hrule\@height2.5pt\@width\headwidth% lower line with 2.5pt line width
+% \vskip-\headrulewidth
+% \vskip-1.5pt}}
+% \makeatother
+
+% \makeatletter
+% \def\footrule{{\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+% \hrule\@height\headrulewidth\@width\headwidth
+% \vskip 1.5pt% 1.5pt between lines
+% \hrule\@height2.5pt\@width\headwidth% upper line with 2.5pt line width
+% \vskip-\headrulewidth
+% \vskip-1.5pt}}
+% \makeatother
 
 \patchcmd{\chapter}{\thispagestyle{plain}}{\thispagestyle{fancy}}{}{}
-
 
 \include{chapter1}
 \include{chapter2}

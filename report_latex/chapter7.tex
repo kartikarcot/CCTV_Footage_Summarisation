@@ -1,74 +1,116 @@
-\chapter{Software Testing}
-The aim of Software Testing is to detect defects or errors testing the components of programs individually. During testing, the components are combined to form a complete system. At this particular stage, testing is concerned to demonstrate that the function meets the required functional goals, and does not behave in abnormal ways. The test cases are chosen to assure the system behavior can be tested for all combinations. Accordingly, the expected behavior of the system under different combinations is given. Therefore test cases are selected which have inputs and the outputs on expected lines, inputs that are not valid and for which suitable messages must be given and inputs that do not occur very frequently which can be regarded as special cases. For testing software, various test strategies are to be used such as unit testing, integration testing, system testing and interface testing.
+\chapter{Software Testing of CCTVVS}
+The aim of Software Testing is to detect defects or errors testing the
+components of programs individually. During testing, the components are
+combined to form a complete system. At this particular stage, testing is
+concerned to demonstrate that the function meets the required functional goals,
+and does not behave in abnormal ways. The test cases are chosen to assure the
+system behavior can be tested for all combinations. Accordingly, the expected
+behavior of the system under different combinations is given. Therefore test
+cases are selected which have inputs and the outputs on expected lines, inputs
+that are not valid and for which suitable messages must be given and inputs that
+do not occur very frequently which can be regarded as special cases. For testing
+software, various test strategies are to be used such as unit testing,
+integration testing, system testing and interface testing.
 
-In this chapter, several test cases are designed for testing the behavior of all modules. When all modules are implemented completely, they are integrated and deployed on Tomcat server or on Jetty Container. Test cases are executed under same environment. Test cases mainly contain tests for functionality of all modules. Once the application passes all the test cases it is deployed on the production environment for actual real time use.
-
+In this chapter, several test cases are designed for testing the behavior of
+all modules. When all modules are implemented completely, they are integrated
+and deployed on Tomcat server or on Jetty Container. Test cases are executed
+under same environment. Test cases mainly contain tests for functionality of
+all modules. Once the application passes all the test cases it is deployed on
+the production environment for actual real time use.
 
 \section{Test Environment}
-The test environment is important to get right, because a major problem faced by most python tools are dependency issues. We use the Anaconda distribution of python and created a virtual environment with all the packages preinstalled. This way these environments can be easily exported to other systems as well. In the future we will look into writing a dockerfile to generate an linux image with all the existing dependencies pre-installed. Additionally, we used Jupyter notebook for modular development and testing as it provides an interactive way of developing and testing code.
+The test environment is important to get right, because a major problem faced
+by most python tools are dependency issues. The Anaconda distribution of
+python is used to create a virtual environment with all the packages
+pre-installed. This way these environments can be easily exported to other
+systems as well. In the future, the possibility of writing a dockerfile to
+generate an linux image with all the existing dependencies pre-installed can be
+explored. Additionally, Jupyter notebook was used for modular development and
+testing as it provides an interactive way of developing and testing code.
 
 \section{Unit Testing of Main Modules}
-Unit test is the verification effort on the smallest unit of software design, the software modules. Unit testing ensures that the bugs that occur can be pinpointed easily since the code tested on is a small unit. The section describes some of the unit tests run with test case details and brief explanations.
+Unit test is the verification effort on the smallest unit of software design,
+the software modules. Unit testing ensures that the bugs that occur can be
+pinpointed easily since the code tested on is a small unit. The section
+describes some of the unit tests run with test case details and brief
+explanations.
 
     \subsection{Unit testing of real-time phase modules}
-    The following tables show the test cases for Real-Time phase on which this testing is performed.
+    The following tables show the test cases for Real-Time phase on which this
+    testing is performed.
 
         \subsubsection{Read Video Feed}
 
-        Table \ref{table:unit-video-read} shows the test case details for testing the Video Reader sub module. This test was successful. Here, the input was the video file which was successfully worked on by the submodule.
+        Table~\ref{table:unit-video-read} shows the test case details for
+        testing the Video Reader sub module. This test was successful. Here,
+        the input was the video file which was successfully read.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Video Read}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 1}\\
                 \hline
-                \textbf{Name of the Test case}  & Read video \\
+                \textbf{Name of the Test case}& Read video \\
                 \hline
-                \textbf{Feature being Tested}  & Proper loading of video from disk \\
+                \textbf{Feature being Tested}  & Proper loading of video from
+                disk \\
                 \hline
-                \textbf{Description}           &  Loading video smoothly, quickly and without exceptions \\
+                \textbf{Description}           &  Loading video smoothly,
+                quickly and without exceptions \\
                 \hline
                 \textbf{Sample Input}          & Video File \\
                 \hline
-                \textbf{Expected Output}       & Load list of frames into memory if file exists else eror that file not found \\
+                \textbf{Expected Output}       & Load list of frames into
+                memory if file exists else error that file not found \\
                 \hline
                 \textbf{Actual Output}         & As expected \\
                 \hline
-                \textbf{Remarks }              & Test case passed successfully \\
+                \textbf{Remarks }              & Test case passed
+                successfully \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Video Read}
             \label{table:unit-video-read}
         \end{table}
 
 
         \subsubsection{Motion Detection Test}
 
-        Table \ref{table:unit-motion-detection} shows the test case details of Motion detection submodule. The input to this submodule is the video frame list. The submodule works by applying a Mixture of gaussians algorithm on a buffer of video frames to generate a mask of frames with action marked as white. This test was successful.
+        Table \ref{table:unit-motion-detection} shows the test case details of
+        Motion detection sub-module. The input to this sub-module is the video
+        frame list. The sub-module works by applying a Mixture of gaussians
+        algorithm on a buffer of video frames to generate a mask of frames with
+        action marked as white. This test was successful.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Motion Detection}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 2}\\
                 \hline
-                \textbf{Name of the Test case}  & Motion detection and masking \\
+                \textbf{Name of the Test case}& Motion detection and masking \\
                 \hline
-                \textbf{Feature being Tested}  & Detection of motion and generation of mask of movement in the frame \\
+                \textbf{Feature being Tested}  & Detection of motion and
+                generation of mask of movement in the frame \\
                 \hline
-                \textbf{Description}           & For each frame, motion should be detected and a mask of which part of the frame has motion should be created \\
+                \textbf{Description}           & For each frame, motion should
+                be detected and a mask of which part of the frame has motion
+                should be created \\
                 \hline
                 \textbf{Sample Input}          & List of video frames \\
                 \hline
-                \textbf{Expected Output}       & List of binary masked frames \\
+                \textbf{Expected Output}       & List of binary masked
+                frames \\
                 \hline
                 \textbf{Actual Output}         & As expected \\
                 \hline
-                \textbf{Remarks }              & Test case passed successfully \\
+                \textbf{Remarks }              & Test case passed
+                successfully \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Motion Detection}
             \label{table:unit-motion-detection}
         \end{table}
 
@@ -79,298 +121,399 @@ Unit test is the verification effort on the smallest unit of software design, th
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Motion Detection}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 3}\\
                 \hline
-                \textbf{Name of the Test case}  & Background video generation \\
+                \textbf{Name of the Test case}& Background video generation \\
                 \hline
                 \textbf{Feature being Tested}  & Generation of static background \\
                 \hline
-                \textbf{Description}           & For a given video, a static background is to be generated from the video with movement so that events can be blended into it, to generate the summary \\
+                \textbf{Description}           & For a given video, a static
+                background is to be generated from the video with movement so
+                that events can be blended into it, to generate the summary \\
                 \hline
                 \textbf{Sample Input}          & List of video frames \\
                 \hline
-                \textbf{Expected Output}       & List of binary frames with minimal movement/no movement \\
+                \textbf{Expected Output}       & List of frames with
+                minimal movement / no movement \\
                 \hline
-                \textbf{Actual Output}         & Static frames, with only slow/gradual changes like shadows changing \\
+                \textbf{Actual Output}         & Static frames, with only
+                slow/gradual changes like shadows changing \\
                 \hline
                 \textbf{Remarks }              & Test case passed successfully \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Motion Detection}
             \label{table:unit-background-generation}
         \end{table}
 
 
         \subsubsection{Tube Labelling Test}
 
-        Table \ref{table:unit-tube-labelling} shows the test case details for tube labelling. The input is a list of masked frames representing optical flows. This sub-module identifies connected components and labels individual optical flows. It outputs a dictionary with each individual identified optical flow ids in place of each pixel. This test was also successful.
+        Table \ref{table:unit-tube-labelling} shows the test case details for
+        tube labelling. The input is a list of masked frames representing
+        optical flows. This sub-module identifies connected components and
+        labels individual optical flows. It outputs a dictionary with each
+        individual identified optical flow ids in place of each pixel. This
+        test was also successful.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Tube Labelling}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 4}\\
                 \hline
-                \textbf{Name of the Test case}  & Tube labelling \\
+                \textbf{Name of the Test case}& Tube labelling \\
                 \hline
-                \textbf{Feature being Tested}  & Labelling of detected motion with unique event IDs \\
+                \textbf{Feature being Tested}  & Labelling of detected motion
+                with unique event IDs \\
                 \hline
-                \textbf{Description}           & From the motion mask, the different events occurring in the same frame must be distinguished by assigning a unique even ID to each event \\
+                \textbf{Description}           & From the motion mask, the
+                different events occurring in the same frame must be
+                distinguished by assigning a unique even ID to each event \\
                 \hline
-                \textbf{Sample Input}          & List of masked frames with pixel value of 255 representing the motion \\
+                \textbf{Sample Input}          & List of masked frames with
+                pixel value of 255 representing the motion \\
                 \hline
-                \textbf{Expected Output}       & List of frames with event ID in each pixel in place of 255 value  \\
+                \textbf{Expected Output}       & List of frames with event ID
+                in each pixel in place of 255 value  \\
                 \hline
-                \textbf{Actual Output}         & As expected, with colliding objects categorized as into the same event \\
+                \textbf{Actual Output}         & As expected, with colliding
+                objects categorized as into the same event \\
                 \hline
                 \textbf{Remarks }              & Test case passed successfully \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Tube Labelling}
             \label{table:unit-tube-labelling}
         \end{table}
 
 
         \subsubsection{Tube Extraction Test}
 
-        Table \ref{table:unit-tube-extraction} shows the test case details for tube extraction. This sub-module extracts individual optical flows from the list of labelled frames output by the tube labelling module. The output is a list of individual tube objects. This test was also successful.
+        Table \ref{table:unit-tube-extraction} shows the test case details for
+        tube extraction. This sub-module extracts individual optical flows from
+        the list of labelled frames output by the tube labelling module. The
+        output is a list of individual tube objects. This test was also
+        successful.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Tube Extraction}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 5}\\
                 \hline
-                \textbf{Name of the Test case}  & Tube Extraction \\
+                \textbf{Name of the Test case}& Tube Extraction \\
                 \hline
-                \textbf{Feature being Tested}  & Extract every event from the labelled volume into separate tubes \\
+                \textbf{Feature being Tested}  & Extract every event from the
+                labelled volume into separate tubes \\
                 \hline
-                \textbf{Description}           & From the labelled volume, the different events are extracted into separate tubes with the original start time being stored \\
+                \textbf{Description}           & From the labelled volume, the
+                different events are extracted into separate tubes with the
+                original start time being stored \\
                 \hline
                 \textbf{Sample Input}          & List of labelled frames \\
                 \hline
-                \textbf{Expected Output}       & Multiple tubes, each tube a set of frames, which has the motion mask of individual events \\
+                \textbf{Expected Output}       & Multiple tubes, each tube a
+                set of frames, which has the motion mask of individual events \\
                 \hline
                 \textbf{Actual Output}         & As expected \\
                 \hline
                 \textbf{Remarks }              & Test case passed successfully \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Tube Extraction}
             \label{table:unit-tube-extraction}
         \end{table}
 
 
         \subsubsection{Colour Tube Generation Test}
 
-        Table \ref{table:unit-colour-tube-generation} shows the test case details for colour tube generation. This sub-module is going to extract color tubes from the individual optical flow tubes extracted in the previous sub-module. The extracted color tubes are added into the the attributes of each of the tube object in the list of tube objects passed to the module. The sub-module returns the updated list of tube objects. This test was also successful.
+        Table \ref{table:unit-colour-tube-generation} shows the test case
+        details for colour tube generation. This sub-module is going to extract
+        color tubes from the individual optical flow tubes extracted in the
+        previous sub-module. The extracted color tubes are added into the the
+        attributes of each of the tube object in the list of tube objects
+        passed to the module. The sub-module returns the updated list of tube
+        objects. This test was also successful.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Colour Tube Generation}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 6}\\
                 \hline
-                \textbf{Name of the Test case}  & Colour Tube Generation \\
+                \textbf{Name of the Test case}& Colour Tube Generation \\
                 \hline
-                \textbf{Feature being Tested}  & Generate a colour/object tube using original video and individual tube mask \\
+                \textbf{Feature being Tested}  & Generate a colour/object tube
+                using original video and individual tube mask \\
                 \hline
-                \textbf{Description}           & Bitwise AND operation is used to extract only the required part of original video \\
+                \textbf{Description}           & Bitwise AND operation is used
+                to extract only the required part of original video \\
                 \hline
-                \textbf{Sample Input}          & List of original frames, List of individual event tubes \\
+                \textbf{Sample Input}          & List of original frames, List
+                of individual event tubes \\
                 \hline
-                \textbf{Expected Output}       & Multiple tubes, each tube a set of frames, which has the coloured image of individual events \\
+                \textbf{Expected Output}       & Multiple tubes, each tube a
+                set of frames, which has the coloured image of individual events \\
                 \hline
                 \textbf{Actual Output}         & As expected \\
                 \hline
                 \textbf{Remarks }              & Test case passed successfully \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Colour Tube Generation}
             \label{table:unit-colour-tube-generation}
         \end{table}
 
 
         \subsubsection{Object Detection Test}
 
-        Table \ref{table:unit-object-detection} shows the test case details for object detection sub-module. This sub-module takes a list of object tubes and passes each color tube in these objects through a pretrained convolutional neural network and identifies objects. It updates the tags attributes in each tube object and returns the list of updated tube object list. This test was also successful.
+        Table~\ref{table:unit-object-detection} shows the test case details for
+        object detection sub-module. This sub-module takes a list of object
+        tubes and passes each color tube in these objects through a pre-trained
+        convolutional neural network which identifies objects. It updates the
+        tags attributes in each tube object and returns the list of updated
+        tube object list. This test was also successful.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Object Detection}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 7}\\
                 \hline
-                \textbf{Name of the Test case}  & Object Detection \\
+                \textbf{Name of the Test case}& Object Detection \\
                 \hline
                 \textbf{Feature being Tested}  & Detection of objects in colour tubes \\
                 \hline
-                \textbf{Description}           & YOLOv3 object detector is run on few frames in each colour tube to detect the objects \\
+                \textbf{Description}           & YOLOv3 object detector is run
+                on few frames in each colour tube to detect the objects \\
                 \hline
                 \textbf{Sample Input}          & Colour tubes \\
                 \hline
-                \textbf{Expected Output}       & Set of tags associated with each tube \\
+                \textbf{Expected Output}       & Set of tags associated with
+                each tube \\
                 \hline
-                \textbf{Actual Output}         & All objects detected correctly in majority of cases \\
+                \textbf{Actual Output}         & All objects detected correctly
+                in majority of cases \\
                 \hline
                 \textbf{Remarks }              & Test case passed satisfactorily \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Object Detection}
             \label{table:unit-object-detection}
         \end{table}
 
 
     \subsection{Unit testing of query phase modules}
-    The following tables show the test cases for query phase on which this testing is performed.
+    The following tables show the test cases for query phase on which this
+    testing is performed.
 
         \subsubsection{Simulated Annealing Test}
 
-        Table \ref{table:unit-simulated-annealing} shows the test case details for simulated annealing sub-module test. The input to this module are a list of tube objects. The sub module rearranges these tubes in time such that it optimizes a loss function designed to reduce collision and length of the summary generated. The sub-module generates an optimal configuration for the list of tubes provided. This test was successful.
+        Table \ref{table:unit-simulated-annealing} shows the test case details
+        for simulated annealing sub-module test. The input to this module are a
+        list of tube objects. The sub module rearranges these tubes in time
+        such that it optimizes a loss function designed to reduce collision and
+        length of the summary generated. The sub-module generates an optimal
+        configuration for the list of tubes provided. This test was successful.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Simulated Annealing}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 8}\\
                 \hline
-                \textbf{Name of the Test case}  & Simulated Annealing \\
+                \textbf{Name of the Test case}& Simulated Annealing \\
                 \hline
                 \textbf{Feature being Tested}  & Optimize the placement of tubes \\
                 \hline
-                \textbf{Description}           & The selected colour tubes are to be placed optimally to prevent overlap of events \\
+                \textbf{Description}           & The selected colour tubes are
+                to be placed optimally to prevent overlap of events \\
                 \hline
-                \textbf{Sample Input}          & Tubes with their lengths, with start time set to 0 \\
+                \textbf{Sample Input}          & Tubes with their lengths, with
+                start time set to 0 \\
                 \hline
                 \textbf{Expected Output}       & Tubes with optimal start times \\
                 \hline
-                \textbf{Actual Output}         & Optimization works well and avoids collision of events in most cases \\
+                \textbf{Actual Output}         & Optimization works well and
+                avoids collision of events in most cases \\
                 \hline
-                \textbf{Remarks }              & Test case passed successfully; Further testing required for longer videos and videos with more events \\
+                \textbf{Remarks }              & Test case passed successfully;
+                Further testing required for longer videos and videos with
+                more events \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Simulated Annealing}
             \label{table:unit-simulated-annealing}
         \end{table}
 
 
         \subsubsection{Image Blending Test}
 
-        Table \ref{table:unit-image-blending} shows the test case details for Image blending sub-module test. The module takes input of a list of object tubes and the optimized configuration generated by the previous sub-module. It blends the color tubes present in each tube object to generate a summary which is then blended with a static weighted background generated in the previous phase. The output is a final summary with time-stamps on each event shown. While the module performs relatively well in cases of fixed camera settings but however has problems with shaky footage. It has room for improvement but the test for this module remains largely successful.
+        Table \ref{table:unit-image-blending} shows the test case details for
+        Image blending sub-module test. The module takes input of a list of
+        object tubes and the optimized configuration generated by the previous
+        sub-module. It blends the color tubes present in each tube object to
+        generate a summary which is then blended with a static weighted
+        background generated in the previous phase. The output is a final
+        summary with time-stamps on each event shown. While the module performs
+        relatively well in cases of fixed camera settings but however has
+        problems with shaky footage. It has room for improvement but the test
+        for this module remains largely successful.
 
         \FloatBarrier
         \begin{table}[H]
+            \caption{Unit Testing of Image Blending}
             \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
                 \hline
                 \textbf{Sl. No }              &\textbf{ 9}\\
                 \hline
-                \textbf{Name of the Test case}  & Image Blending \\
+                \textbf{Name of the Test case}& Image Blending \\
                 \hline
-                \textbf{Feature being Tested}  & Blending of tubes into the static background \\
+                \textbf{Feature being Tested}  & Blending of tubes into the
+                static background \\
                 \hline
-                \textbf{Description}           & The selected colour tubes are to be blended into the static background at the optimal time determined by simulated annealing \\
+                \textbf{Description}           & The selected colour tubes are
+                to be blended into the static background at the optimal time
+                determined by simulated annealing \\
                 \hline
-                \textbf{Sample Input}          & Colour tubes and metadata, static background \\
+                \textbf{Sample Input}          & Colour tubes and metadata,
+                static background \\
                 \hline
-                \textbf{Expected Output}       & Events blended into the background seamlessly at the time determined by simulated annealing \\
+                \textbf{Expected Output}       & Events blended into the
+                background seamlessly at the time determined by simulated annealing \\
                 \hline
-                \textbf{Actual Output}         & Events blended in at the correct time, but not seamlessly in all cases, especially at the edges of the frame \\
+                \textbf{Actual Output}         & Events blended in at the
+                correct time, but not seamlessly in all cases, especially at
+                the edges of the frame \\
                 \hline
-                \textbf{Remarks }              & Test case passed, but blending function can be improved \\
+                \textbf{Remarks }              & Test case passed, but blending
+                function can be improved \\
                 \hline
             \end{tabular}
-            \caption{Unit Testing of Image Blending}
             \label{table:unit-image-blending}
         \end{table}
 
 \section{Integration Testing}
 
-Integration testing is a systematic technique for constructing the program structure while at the same time conducting tests to uncover errors associated with interfacing. The objective is to take unit tested components and build a program structure.
+Integration testing is a systematic technique for constructing the program
+structure while at the same time conducting tests to uncover errors associated
+with interfacing. The objective is to take unit tested components and build a
+program structure.
 
     \subsection{Integration testing of tubes module}
 
-    In order to standardize the interfaces between each module we created a tube class. Each module passes around a list of these tube objects and hence we could develop and perform iterative development adding features along the way as we developed by just changing a single file adding more features in time. In this test we check for possible errors in the interfacing between the main function and the tube module.
+    In order to standardize the interfaces between each module, a tube class has
+    been created. Each module passes around a list of these tube objects. An
+    iterative development process was adopted which added features along the
+    way, by just changing a single file at a time. In this test, the possible
+    errors in the interfacing between the main function and the tube
+    module is being tested.
 
-    Table \ref{table:integration-tubes} shows the integration testing of tube module and main module. The input is a list of video frames and the output is a list of tube objects which will be used in the rest of the process.
+    Table \ref{table:integration-tubes} shows the integration testing of tube
+    module and main module. The input is a list of video frames and the output
+    is a list of tube objects which will be used in the rest of the process.
 
     \FloatBarrier
     \begin{table}[H]
+        \caption{Integration Testing of Tubes Module}
         \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
             \hline
             \textbf{Sl. No }              &\textbf{ 1}\\
             \hline
-            \textbf{Name of the Test case}  & Tube labelling and extraction \\
+            \textbf{Name of the Test case}& Tube labelling and extraction \\
             \hline
-            \textbf{Feature being Tested}  & Interface between main module and tube module \\
+            \textbf{Feature being Tested}  & Interface between main module and
+            tube module \\
             \hline
-            \textbf{Description}           & Data is to be passed between the modules using a defined data structure \\
+            \textbf{Description}           & Data is to be passed between the
+            modules using a defined data structure \\
             \hline
             \textbf{Sample Input}          & Input video frames \\
             \hline
-            \textbf{Expected Output}       & Tube data structure with extracted tube mask, and colour tubes \\
+            \textbf{Expected Output}       & Tube data structure with
+            extracted tube mask, and colour tubes \\
             \hline
             \textbf{Actual Output}         & As expected \\
             \hline
             \textbf{Remarks }              & Test case passed successfully \\
             \hline
         \end{tabular}
-        \caption{Integration Testing of Tubes Module}
         \label{table:integration-tubes}
     \end{table}
 
 
     \subsection{Integration testing of detection module}
 
-    Table \ref{table:integration-detection} shows the test in which we check the interfacing between the detection module and the main module.
+    Table \ref{table:integration-detection} shows the test in which the
+    interfacing between the detection module and the main module is checked.
 
     \FloatBarrier
     \begin{table}[H]
+        \caption{Integration Testing of Detection Module}
         \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
             \hline
             \textbf{Sl. No }              &\textbf{ 2}\\
             \hline
-            \textbf{Name of the Test case}  & Object detection \\
+            \textbf{Name of the Test case}& Object detection \\
             \hline
-            \textbf{Feature being Tested}  & Interface between main module and Object detection module \\
+            \textbf{Feature being Tested}  & Interface between main module and
+            Object detection module \\
             \hline
-            \textbf{Description}           & Object detection module should return the detected tags \\
+            \textbf{Description}           & Object detection module should
+            return the detected tags \\
             \hline
             \textbf{Sample Input}          & Tube data structures \\
             \hline
-            \textbf{Expected Output}       & Tube data structures with tags of detected objects \\
+            \textbf{Expected Output}       & Tube data structures with tags of
+            detected objects \\
             \hline
             \textbf{Actual Output}         & As expected \\
             \hline
             \textbf{Remarks }              & Test case passed successfully \\
             \hline
         \end{tabular}
-        \caption{Integration Testing of Detection Module}
         \label{table:integration-detection}
     \end{table}
 
 \section{System Testing}
 
-System testing is the testing in which all modules,  that  are  tested  by  integration testing are combined  to  form  single  system. The system is  tested  such  that  all  the units are linked properly to satisfy user specific requirement. This  test  helps  in  removing the overall bugs and  improves  quality  and  assurance  of  the  system.  The proper functionality of the system is concluded in system testing.
+System testing is the testing in which all modules, that are tested by
+integration testing are combined to form single system. The system is tested
+such that all the units are linked properly to satisfy user specific
+requirement. This test helps in removing the overall bugs and improves quality
+and assurance of the system. The proper functionality of the system
+is concluded in system testing.
 
-The whole system is evaluated in this system testing, with all main modules being tested. We have devised two system tests as we have two main modules which are relatively well decoupled. The system testing for the real time phase is as shown in Table \ref{table:system-realtime}.
+The whole system is evaluated in this system testing, with all main modules
+being tested. Two system tests have been devised, as there are two main modules
+which are relatively well decoupled. The system testing for the real time phase
+is as shown in Table~\ref{table:system-realtime}.
 
     \subsection{System testing of real-time phase}
 
-    Table \ref{table:system-realtime} shows the system testing for real-time phase. Here all the modules in the real-time phase are combined and tested. The system should automatically generate a list of updated object tubes and a static background video from the input video in realtime. The real-time phase performed successfully.
+    Table \ref{table:system-realtime} shows the system testing for real-time
+    phase. Here all the modules in the real-time phase are combined and tested.
+    The system should automatically generate a list of updated object tubes and
+    a static background video from the input video in real-time. The real-time
+    phase performed successfully.
 
     \FloatBarrier
     \begin{table}[H]
+        \caption{System Testing of Real-Time Module}
         \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
             \hline
             \textbf{Sl. No }              &\textbf{ 1}\\
             \hline
-            \textbf{Name of the Test case}  & Phase 1 (Real-time) \\
+            \textbf{Name of the Test case}& Phase 1 (Real-time) \\
             \hline
             \textbf{Feature being Tested}  & Realtime phase of summary generation \\
             \hline
-            \textbf{Description}           & From the input video, the tubes are extracted, static background is generated, objects are detected and presented to the user in anticipation of phase 2 \\
+            \textbf{Description}           & From the input video, the tubes
+            are extracted, static background is generated, objects are detected
+            and presented to the user in anticipation of phase 2 \\
             \hline
             \textbf{Sample Input}          & Input video \\
             \hline
@@ -381,40 +524,49 @@ The whole system is evaluated in this system testing, with all main modules bein
             \textbf{Remarks }              & Test case passed successfully \\
             \hline
         \end{tabular}
-        \caption{System Testing of Real-Time Module}
         \label{table:system-realtime}
     \end{table}
 
 
     \subsection{System testing of query phase}
 
-    Table \ref{table:system-query} shows the system testing for the query phase. Here all the modules in the query phase are combined and tested. The system should automatically generate a summary from the list of objects and the input query given. The query phase performed successfully.
+    Table \ref{table:system-query} shows the system testing for the query
+    phase. Here all the modules in the query phase are combined and tested. The
+    system should automatically generate a summary from the list of objects and
+    the input query given. The query phase performed successfully.
 
     \FloatBarrier
     \begin{table}[H]
+        \caption{System Testing of Query Module}
         \begin{tabular}{|p{0.3\linewidth}|p{0.6\linewidth}|}
             \hline
             \textbf{Sl. No }              &\textbf{ 2}\\
             \hline
-            \textbf{Name of the Test case}  & Phase 2 (Query) \\
+            \textbf{Name of the Test case}& Phase 2 (Query) \\
             \hline
             \textbf{Feature being Tested}  & Query phase of summary generation \\
             \hline
-            \textbf{Description}           & The user query with required tags is fed in, using which the summary video is generated \\
+            \textbf{Description}           & The user query with required tags
+            is fed in, using which the summary video is generated \\
             \hline
             \textbf{Sample Input}          & User query \\
             \hline
-            \textbf{Expected Output}       & Summary video with clips of only selected tags \\
+            \textbf{Expected Output}       & Summary video with clips of only
+            selected tags \\
             \hline
             \textbf{Actual Output}         & As expected \\
             \hline
             \textbf{Remarks }              & Test case passed successfully \\
             \hline
         \end{tabular}
-        \caption{System Testing of Query Module}
         \label{table:system-query}
     \end{table}
 
 \section{Summary}
 
-This chapter includes the general testing process, which starts with unit testing of the main modules followed by integration testing wherein the submodules and modules are merged together. System testing where the entire system is tested for its functionality and correctness was performed. The tests proved successful in most test cases and abnormal behavior was not traced in any of the modules.
+This chapter includes the general testing process, which starts with unit
+testing of the main modules followed by integration testing wherein the
+sub-modules and modules are merged together. System testing where the entire
+system is tested for its functionality and correctness was performed. The tests
+proved successful in most test cases and abnormal behavior was not traced in
+any of the modules.
