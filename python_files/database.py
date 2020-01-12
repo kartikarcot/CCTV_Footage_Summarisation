@@ -141,7 +141,7 @@ def get_tubes_by_query(clip_name, start, end, tags, min_length):
     tubes = []
 
     for tubedb in TubeDB.objects(clip_name=clip_name, start__gte=start, end__lte=end, length__gte=min_length):
-        print(str(tubedb.clip_name) + " " + str(tubedb.tags))
+        # print(str(tubedb.clip_name) + " " + str(tubedb.tags))
 
         tube = tb.Tube()
         tube.start = tubedb.start

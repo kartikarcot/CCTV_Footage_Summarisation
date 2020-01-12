@@ -46,7 +46,7 @@ class Tube(object):
             color_frame = cv2.bitwise_and(video_frame, mask_3c)
             self.object_tube.append(color_frame)
 
-        # fs.write_file(self.object_tube, "../debug/objecttube" + str(random.randint(1,100)) + ".avi")
+        # fs.write_file(self.object_tube, "../debug/objecttube" + str(random.randint(1,10000)) + ".avi")
 
         return
 
@@ -207,7 +207,7 @@ def extract_tubes(labelled_volume):
                 tube.mask_tube.append(frame_copy)
 
         tubes.append(tube)
-        fs.write_file(tube.mask_tube, "../debug/masktube" + str(random.randint(1,10000)) + ".avi")
+        # fs.write_file(tube.mask_tube, "../debug/masktube" + str(random.randint(1,10000)) + ".avi")
 
     return tubes
 

@@ -61,8 +61,6 @@ class VideoSummary(object):
 
                 index += 1
 
-
-
         for i in range(0, video_length):
             summary.append(bg[i])
 
@@ -88,7 +86,7 @@ def generate_summary_by_query(filename="", tags=['person'], start_frame=0, end_f
         print("No tubes found for given query!")
         return
 
-    anneal = op.SimulatedAnnealing(25, 1, 70, 5)
+    anneal = op.SimulatedAnnealing(30, 1, 70, 5)
     tube_dict = {}
 
 
@@ -113,7 +111,7 @@ def generate_summary_by_query(filename="", tags=['person'], start_frame=0, end_f
         3: [b, 0, 50],
     }
     '''
-    tube_dict = anneal.run(tube_dict, total_tube_len)
+    tube_dict = anneal.run(tube_dict, total_tube_len, 0.2)
     for i,key in enumerate(tube_dict):
         print(tube_dict[key][1:])
 
@@ -124,11 +122,11 @@ def generate_summary_by_query(filename="", tags=['person'], start_frame=0, end_f
 
     # read BG file
     bg = []
-    for i in range(1, phase1_iterations):
+    for i in range(2, phase1_iterations):
         fs.read_file("../storage/background_" + filename + "_" + str(i) + ".avi", bg)
 
-        # if i > 8:
-        #     break
+        if i > 10:
+            break
 
     summary = vid_sum.make_summary(tube_dict, bg, masked_tubes)
 
@@ -144,8 +142,11 @@ def generate_summary_by_query(filename="", tags=['person'], start_frame=0, end_f
 
     while cap.isOpened():
         ret, frame = cap.read()
-        cv2.imshow('summary', frame)
-        cv2.waitKey(30)
+        if ret is True:
+            cv2.imshow('summary', frame)
+            cv2.waitKey(30)
+        else:
+            break
 
     cap.release()
     cv2.destroyAllWindows()
