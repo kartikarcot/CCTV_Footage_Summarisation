@@ -1,0 +1,188 @@
+<html>
+    <head>
+        <script
+        src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css"/>
+
+        <style>
+            .tube {
+                height: 2em;
+                background-color: #FF9F1C;
+                /* border: solid 5px #550C18; */
+                /* width: 10px; */
+                margin: 0.5em;
+                margin-left: 1em;
+            }
+        </style>
+    </head>
+    <body style="font-family: sans-serif">
+        <h2 style="text-align: center; margin: 1em">Simulated Annealing Visualiser</h2>
+        <hr/>
+
+        <div id="info" style="background-color: #eee">
+            <div style="width: 20%; display: inline-block; padding: 0.5em">
+                <b>Epoch:</b>
+                <span id="epoch">0</span>
+            </div>
+            <div style="width: 20%; display: inline-block; padding: 0.5em">
+                <b>Iteration:</b>
+                <span id="iteration">0</span>
+            </div>
+            <div style="width: 40%; display: inline-block; padding: 0.5em">
+                <b>Total Event Length:</b>
+                <span id="totalEventLength">0</span>
+            </div>
+        </div>
+
+        <div id="main" style="background-color: #000; padding: 1em; width: 50%; display: inline-block"></div>
+        <div id="graph" style="padding: 1em; width: 40%; display: inline-block">
+            <canvas id=myCanvas></canvas>
+        </div>
+    </body>
+
+    <script>
+        // var data = {
+        //     'clip_length': 100,
+        //     'tubeLen': [20, 60, 30, 13],
+        //     'init': [15, 21, 19, 57],
+        //     'iter': [
+        //         {
+        //             'epoch': 1,
+        //             'iteration': 3,
+        //             'start': [
+        //                 20, 30, 12, 50
+        //             ],
+        //             'collisionCost': 0.5,
+        //             'lengthCost': 0.3,
+        //             'totalCost': 0.4,
+        //         },
+        //         {
+        //             'epoch': 1,
+        //             'iteration': 4,
+        //             'start': [
+        //                 25, 31, 9, 45
+        //             ],
+        //             'collisionCost': 0.5,
+        //             'lengthCost': 0.3,
+        //             'totalCost': 0.4,
+        //         },
+        //         {
+        //             'epoch': 1,
+        //             'iteration': 5,
+        //             'start': [
+        //                 35, 25, 18, 46
+        //             ],
+        //             'collisionCost': 0.5,
+        //             'lengthCost': 0.3,
+        //             'totalCost': 0.4,
+        //         }
+        //     ]
+        // }
+
+        var data={"clip_length": 1695, "tubeLen": [259, 53, 124, 141, 77, 115, 142, 119, 122, 53, 165, 215, 110], "init": [397, 512, 122, 519, 40, 609, 387, 502, 272, 308, 466, 141, 786], "iter": [{"epoch": 1, "iteration": 5, "start": [589, 336, 110, 550, 0, 737, 451, 698, 311, 485, 541, 421, 811], "collisionCost": 0.3092207053155387, "lengthCost": 0.06754332248247136, "totalCost": 0.21254975218231176}, {"epoch": 1, "iteration": 7, "start": [147, 0, 262, 358, 137, 946, 72, 880, 485, 319, 460, 69, 721], "collisionCost": 0.2589245438988129, "lengthCost": 0.10997294572824663, "totalCost": 0.19934390463058638}, {"epoch": 2, "iteration": 14, "start": [119, 0, 277, 731, 208, 1215, 105, 1130, 572, 687, 972, 661, 1187], "collisionCost": 0.09730148171989009, "lengthCost": 0.2805814098588408, "totalCost": 0.17061345297547037}, {"epoch": 6, "iteration": 32, "start": [328, 0, 184, 547, 291, 1476, 39, 1093, 701, 1033, 796, 450, 1413], "collisionCost": 0.0733507306110093, "lengthCost": 0.6962009133880871, "totalCost": 0.3224908037218404}, {"epoch": 6, "iteration": 34, "start": [386, 146, 95, 697, 200, 1409, 0, 832, 480, 1004, 568, 645, 1269], "collisionCost": 0.10187519688087757, "lengthCost": 0.5513398348846333, "totalCost": 0.2816610520823799}, {"epoch": 7, "iteration": 35, "start": [272, 434, 0, 868, 14, 1238, 239, 682, 490, 1056, 846, 933, 1190], "collisionCost": 0.2775651340936058, "lengthCost": 0.3039756135306148, "totalCost": 0.2881293258684094}, {"epoch": 7, "iteration": 36, "start": [242, 311, 198, 970, 9, 1002, 0, 921, 227, 1004, 1025, 734, 1388], "collisionCost": 0.18434207649834816, "lengthCost": 0.5036200583743147, "totalCost": 0.3120532692487348}, {"epoch": 7, "iteration": 37, "start": [150, 177, 511, 1380, 0, 1270, 283, 1327, 628, 939, 1341, 712, 1292], "collisionCost": 0.15730900029804162, "lengthCost": 0.5456106885615635, "totalCost": 0.3126296756034504}, {"epoch": 12, "iteration": 62, "start": [256, 383, 410, 1234, 250, 1138, 0, 1133, 574, 1130, 1398, 888, 1174], "collisionCost": 0.10367004335891646, "lengthCost": 0.6315298765526748, "totalCost": 0.3148139766364198}, {"epoch": 12, "iteration": 63, "start": [0, 417, 68, 1296, 247, 968, 86, 1090, 740, 1204, 1114, 570, 1141], "collisionCost": 0.22420159600513773, "lengthCost": 0.4072497314969802, "totalCost": 0.2974208502018747}, {"epoch": 13, "iteration": 65, "start": [170, 716, 0, 1259, 452, 1051, 533, 1125, 672, 1317, 1409, 699, 1307], "collisionCost": 0.030758803801375245, "lengthCost": 0.6561871820814461, "totalCost": 0.28093015511340363}, {"epoch": 13, "iteration": 66, "start": [139, 734, 10, 1312, 0, 1106, 105, 1028, 722, 973, 953, 464, 1318], "collisionCost": 0.07090144285863041, "lengthCost": 0.43058161792798866, "totalCost": 0.2147735128863737}, {"epoch": 21, "iteration": 105, "start": [23, 570, 0, 1324, 11, 1231, 175, 1016, 727, 884, 838, 721, 1321], "collisionCost": 0.06634127133751011, "lengthCost": 0.4489536371468914, "totalCost": 0.21938621766126262}, {"epoch": 21, "iteration": 107, "start": [0, 585, 277, 1272, 66, 1356, 222, 1184, 829, 1135, 1051, 690, 1339], "collisionCost": 0.038148554075129286, "lengthCost": 0.4584315499559485, "totalCost": 0.20626175242745698}, {"epoch": 24, "iteration": 124, "start": [0, 692, 270, 1339, 129, 1194, 445, 1331, 770, 1118, 1066, 891, 1205], "collisionCost": 0.09555556423509856, "lengthCost": 0.4730249032306744, "totalCost": 0.2465432998333289}, {"epoch": 27, "iteration": 137, "start": [0, 375, 159, 1220, 123, 1073, 383, 1232, 641, 788, 987, 794, 1059], "collisionCost": 0.10783130689819438, "lengthCost": 0.3125619322505696, "totalCost": 0.18972355703914445}, {"epoch": 29, "iteration": 147, "start": [5, 412, 0, 1307, 264, 950, 311, 1134, 511, 789, 923, 645, 908], "collisionCost": 0.07102339956076358, "lengthCost": 0.4231502952372823, "totalCost": 0.21187415783137106}, {"epoch": 31, "iteration": 155, "start": [44, 331, 0, 1103, 49, 647, 82, 1007, 369, 634, 712, 585, 703], "collisionCost": 0.2104862511636179, "lengthCost": 0.207975652413138, "totalCost": 0.20948201166342595}, {"epoch": 31, "iteration": 158, "start": [132, 430, 67, 1114, 176, 660, 0, 971, 467, 584, 793, 654, 505], "collisionCost": 0.07705423625557185, "lengthCost": 0.21609580538529666, "totalCost": 0.1326708639074618}, {"epoch": 31, "iteration": 159, "start": [250, 275, 131, 997, 203, 468, 0, 1046, 411, 566, 861, 768, 616], "collisionCost": 0.09348813421129307, "lengthCost": 0.15796150739455264, "totalCost": 0.11927748348459691}, {"epoch": 34, "iteration": 173, "start": [296, 386, 272, 1078, 313, 443, 0, 1156, 527, 713, 758, 674, 664], "collisionCost": 0.10369397018381571, "lengthCost": 0.23168060853364134, "totalCost": 0.15488862552374597}, {"epoch": 39, "iteration": 196, "start": [93, 152, 246, 1070, 118, 362, 0, 1193, 484, 723, 612, 519, 509], "collisionCost": 0.04397458448408334, "lengthCost": 0.2635359573946099, "totalCost": 0.13179913364829396}, {"epoch": 45, "iteration": 225, "start": [114, 170, 352, 1192, 98, 346, 0, 1217, 589, 935, 754, 718, 637], "collisionCost": 0.16058443894389368, "lengthCost": 0.2865047968601901, "totalCost": 0.21095258211041223}, {"epoch": 45, "iteration": 227, "start": [74, 144, 356, 1258, 16, 316, 0, 1174, 576, 875, 748, 830, 729], "collisionCost": 0.11966410384556904, "lengthCost": 0.35677831069898547, "totalCost": 0.2145097865869356}, {"epoch": 45, "iteration": 228, "start": [117, 186, 326, 1260, 0, 367, 33, 1172, 578, 826, 655, 798, 569], "collisionCost": 0.080011702040277, "lengthCost": 0.3592715103066535, "totalCost": 0.1917156253468276}, {"epoch": 45, "iteration": 229, "start": [121, 87, 394, 1164, 0, 457, 90, 1143, 708, 826, 631, 750, 637], "collisionCost": 0.08845312396795507, "lengthCost": 0.2571903726583979, "totalCost": 0.15594802344413222}, {"epoch": 46, "iteration": 230, "start": [127, 197, 357, 1228, 0, 500, 99, 1056, 676, 717, 647, 789, 753], "collisionCost": 0.04466085785948669, "lengthCost": 0.32139078644336844, "totalCost": 0.1553528292930394}, {"epoch": 46, "iteration": 231, "start": [28, 302, 410, 1163, 6, 479, 0, 1121, 756, 721, 684, 809, 765], "collisionCost": 0.10578579537718491, "lengthCost": 0.25629642023131705, "totalCost": 0.16599004531883776}, {"epoch": 46, "iteration": 232, "start": [164, 405, 356, 1308, 0, 463, 8, 1066, 742, 657, 733, 862, 700], "collisionCost": 0.03272942500119401, "lengthCost": 0.4246262278043697, "totalCost": 0.18948814612246428}, {"epoch": 48, "iteration": 242, "start": [109, 499, 310, 1261, 0, 518, 90, 1033, 686, 611, 817, 879, 684], "collisionCost": 0.06906609234173104, "lengthCost": 0.36052463603634466, "totalCost": 0.1856495098195765}, {"epoch": 48, "iteration": 243, "start": [162, 521, 411, 1238, 0, 675, 60, 1109, 748, 662, 873, 968, 740], "collisionCost": 0.1039796007437107, "lengthCost": 0.33277837486043965, "totalCost": 0.1954991103904023}, {"epoch": 51, "iteration": 257, "start": [74, 396, 403, 1221, 0, 704, 14, 1109, 677, 576, 785, 968, 635], "collisionCost": 0.11083051669532328, "lengthCost": 0.3136521367009333, "totalCost": 0.1919591646975673}, {"epoch": 52, "iteration": 260, "start": [84, 428, 396, 1269, 0, 694, 155, 1190, 660, 653, 826, 1007, 688], "collisionCost": 0.07741798264485301, "lengthCost": 0.3707082800314971, "totalCost": 0.19473410159951066}, {"epoch": 52, "iteration": 262, "start": [0, 426, 388, 1213, 25, 653, 175, 1252, 623, 592, 889, 997, 625], "collisionCost": 0.1126550444014292, "lengthCost": 0.3236366947809545, "totalCost": 0.19704770455323933}, {"epoch": 53, "iteration": 266, "start": [45, 341, 290, 1189, 0, 551, 122, 1199, 628, 578, 875, 951, 603], "collisionCost": 0.10059232161186789, "lengthCost": 0.2805814098588408, "totalCost": 0.17258795691065704}, {"epoch": 55, "iteration": 277, "start": [46, 309, 305, 1208, 0, 522, 146, 1228, 648, 567, 874, 910, 566], "collisionCost": 0.08055016955338487, "lengthCost": 0.2997713156895861, "totalCost": 0.16823862800786538}, {"epoch": 56, "iteration": 280, "start": [14, 362, 375, 1178, 0, 508, 227, 1277, 712, 618, 957, 878, 585], "collisionCost": 0.020969391411535376, "lengthCost": 0.3530709146111989, "totalCost": 0.1538100006914008}, {"epoch": 56, "iteration": 282, "start": [0, 324, 357, 1100, 9, 479, 183, 1219, 727, 588, 930, 821, 601], "collisionCost": 0.002395064086240557, "lengthCost": 0.28850691869805456, "totalCost": 0.11683980593096617}, {"epoch": 57, "iteration": 287, "start": [0, 278, 329, 1061, 23, 518, 159, 1160, 704, 596, 913, 771, 594], "collisionCost": 0.01636863227549502, "lengthCost": 0.2349299330396419, "totalCost": 0.10379315258115378}, {"epoch": 58, "iteration": 291, "start": [0, 348, 414, 1115, 31, 534, 249, 1187, 714, 634, 910, 781, 612], "collisionCost": 0.023904997673380026, "lengthCost": 0.25808744315845505, "totalCost": 0.11757797586741005}, {"epoch": 58, "iteration": 292, "start": [36, 388, 468, 1147, 0, 505, 249, 1153, 776, 659, 938, 798, 652], "collisionCost": 0.015334789939815857, "lengthCost": 0.24240850973879058, "totalCost": 0.10616427785940574}, {"epoch": 60, "iteration": 302, "start": [0, 371, 492, 1090, 8, 516, 186, 1117, 726, 674, 937, 805, 682], "collisionCost": 0.021217366758564733, "lengthCost": 0.20226239992345804, "totalCost": 0.09363538002452207}, {"epoch": 60, "iteration": 303, "start": [20, 354, 475, 1096, 0, 521, 132, 1087, 703, 645, 898, 751, 654], "collisionCost": 0.015829958289108617, "lengthCost": 0.20296788368774768, "totalCost": 0.09068512844856426}, {"epoch": 60, "iteration": 304, "start": [9, 338, 411, 1104, 0, 528, 144, 1079, 705, 632, 904, 754, 585], "collisionCost": 0.021469801202728855, "lengthCost": 0.2087010637906384, "totalCost": 0.09636230623789269}, {"epoch": 61, "iteration": 305, "start": [0, 330, 447, 1112, 6, 551, 166, 1115, 772, 654, 964, 814, 638], "collisionCost": 0.03130384317026474, "lengthCost": 0.21459618751483023, "totalCost": 0.10462078090809095}, {"epoch": 61, "iteration": 307, "start": [0, 373, 424, 1091, 22, 608, 219, 1099, 822, 666, 942, 802, 680], "collisionCost": 0.039656924650902314, "lengthCost": 0.19946490126413272, "totalCost": 0.10358011529619449}, {"epoch": 61, "iteration": 309, "start": [18, 352, 420, 1103, 0, 568, 222, 1045, 825, 641, 941, 809, 653], "collisionCost": 0.03151624661198217, "lengthCost": 0.207975652413138, "totalCost": 0.10210000893244452}, {"epoch": 63, "iteration": 315, "start": [45, 382, 403, 1133, 0, 601, 227, 1068, 821, 671, 976, 831, 644], "collisionCost": 0.011327082601037482, "lengthCost": 0.23087532394944235, "totalCost": 0.09914637914039943}, {"epoch": 63, "iteration": 317, "start": [24, 383, 422, 1111, 0, 628, 213, 1100, 847, 646, 1008, 869, 645], "collisionCost": 0.011428547827045582, "lengthCost": 0.21385028563410172, "totalCost": 0.09239724294986804}, {"epoch": 63, "iteration": 319, "start": [27, 398, 408, 1075, 0, 628, 185, 1068, 830, 605, 984, 828, 657], "collisionCost": 0.01415202401288883, "lengthCost": 0.18865651505001105, "totalCost": 0.08395382042773773}, {"epoch": 64, "iteration": 320, "start": [0, 393, 375, 1090, 20, 626, 204, 1086, 804, 599, 980, 816, 652], "collisionCost": 0.014635513886242374, "lengthCost": 0.1987715933041208, "totalCost": 0.08828994565339375}, {"epoch": 64, "iteration": 323, "start": [9, 394, 384, 1091, 0, 612, 219, 1093, 791, 614, 1003, 819, 641], "collisionCost": 0.011845496709401587, "lengthCost": 0.19946490126413272, "totalCost": 0.08689325853129404}, {"epoch": 66, "iteration": 330, "start": [5, 373, 351, 1074, 0, 611, 191, 1094, 793, 602, 989, 804, 635], "collisionCost": 0.015323510784926206, "lengthCost": 0.18800077530450532, "totalCost": 0.08439441659275784}, {"epoch": 66, "iteration": 333, "start": [14, 359, 358, 1061, 0, 617, 187, 1089, 797, 608, 988, 815, 639], "collisionCost": 0.018042981361874433, "lengthCost": 0.1834739742487314, "totalCost": 0.08421537851661723}, {"epoch": 66, "iteration": 334, "start": [28, 382, 381, 1077, 0, 620, 216, 1098, 807, 604, 1011, 824, 662], "collisionCost": 0.01367157220512067, "lengthCost": 0.18997486410655878, "totalCost": 0.08419288896569592}, {"epoch": 67, "iteration": 337, "start": [23, 370, 376, 1062, 0, 615, 199, 1087, 796, 605, 999, 821, 654], "collisionCost": 0.015581068321050884, "lengthCost": 0.18220073874997508, "totalCost": 0.08222893649262056}, {"epoch": 67, "iteration": 338, "start": [12, 365, 363, 1054, 0, 598, 180, 1068, 774, 581, 973, 795, 640], "collisionCost": 0.011481426109591667, "lengthCost": 0.17535424828870866, "totalCost": 0.07703055498123847}, {"epoch": 69, "iteration": 345, "start": [13, 367, 363, 1053, 0, 596, 183, 1070, 772, 585, 971, 796, 645], "collisionCost": 0.012087129780791689, "lengthCost": 0.17474474508593982, "totalCost": 0.07715017590285095}, {"epoch": 69, "iteration": 346, "start": [14, 368, 366, 1056, 0, 599, 182, 1076, 777, 588, 975, 801, 649], "collisionCost": 0.012988720275699885, "lengthCost": 0.17657963988322514, "totalCost": 0.07842508811870999}, {"epoch": 69, "iteration": 347, "start": [17, 371, 367, 1055, 0, 599, 186, 1075, 777, 592, 973, 801, 648], "collisionCost": 0.013106083113758864, "lengthCost": 0.17596587741608838, "totalCost": 0.07825000083469066}, {"epoch": 69, "iteration": 349, "start": [11, 369, 365, 1052, 0, 600, 187, 1071, 777, 589, 969, 797, 646], "collisionCost": 0.012348341618539725, "lengthCost": 0.17413736041840913, "totalCost": 0.07706394913848749}]}
+
+
+        $(document).ready(function(){
+            // graph
+
+            var ctx = document.getElementById('myCanvas').getContext('2d');
+            var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'line',
+
+                // The data for our dataset
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Collision Cost',
+                            backgroundColor: 'rgba(255, 99, 132, 0)',
+                            borderColor: 'rgb(200, 30, 30)',
+                            data: [],
+                            hidden: true
+                        },
+                        {
+                            label: 'Length Cost',
+                            backgroundColor: 'rgba(250, 200, 20, 0)',
+                            borderColor: 'rgb(250, 200, 20)',
+                            data: [],
+                            hidden: true
+                        },
+                        {
+                            label: 'Total Cost',
+                            backgroundColor: 'rgba(0, 117, 242, 0.5)',
+                            borderColor: 'rgb(0, 117, 242)',
+                            data: []
+                        }
+                    ]
+                },
+
+                // Configuration options go here
+                options: {}
+            });
+
+            $('#totalEventLength').html(data.clip_length + " frames / " + data.clip_length/30 + " secs");
+
+            for (var i=0; i<data.tubeLen.length; i++) {
+                var width = data.tubeLen[i]*100/data.clip_length;
+                var pos = data.init[i]*100/data.clip_length;
+                $("#main").append(
+                    "<div class='tube' style='width:" + width + "%; margin-left:" + pos + "%;'></div>"
+                )
+            }
+
+            setTimeout(function(){
+                shiftTubes();
+            }, 1000);
+
+            var curr = 0;
+
+            function shiftTubes() {
+                console.log(curr)
+
+                $('#epoch').html(data.iter[curr].epoch);
+                $('#iteration').html(data.iter[curr].iteration);
+
+                for (var j=0; j<data.tubeLen.length; j++) {
+                    var pos = data.iter[curr].start[j]*100/data.clip_length;
+                    $("#main").children().eq(j)
+                        .animate({'margin-left': pos + '%'}, 100)
+                }
+                curr += 1
+
+                // update graph
+                costs = []
+                costs.push(data.iter[curr].collisionCost)
+                costs.push(data.iter[curr].lengthCost)
+                costs.push(data.iter[curr].totalCost)
+
+                chart.data.labels.push(data.iter[curr].iteration);
+                chart.data.datasets
+                // chart.data.datasets.forEach((costs) => {
+                //     dataset.data.push(costs);
+                // });
+                chart.data.datasets[0].data.push(data.iter[curr].collisionCost)
+                chart.data.datasets[1].data.push(data.iter[curr].lengthCost)
+                chart.data.datasets[2].data.push(data.iter[curr].totalCost)
+                chart.update();
+
+
+
+                if (curr < data.iter.length) {
+                    setTimeout(function(){
+                        shiftTubes();
+                    }, 200);
+                }
+            }
+
+
+
+
+        });
+    </script>
+</html>

@@ -2,14 +2,15 @@ import cv2
 import numpy as np
 import time
 
-'''
-feedforward of yolo outs scores and positions of each category for each type of box
-these values are fed to NMS function which returns a list of values which are the indices of cateogories in the classIDs and boxes list
-'''
+
 class Object_Detector(object):
+    """
+    feedforward of yolo outs scores and positions of each category for each type of box
+    these values are fed to NMS function which returns a list of values which are the indices of cateogories in the classIDs and boxes list
+    """
 
     def __init__(self, configPath, weightsPath, labelsPath, confidence=0.9, threshold=0.8):
-        #  you'll need at least OpenCV 3.4.2  for dnn module
+        #  you'll need at least OpenCV 3.4.2 for dnn module
         self.configPath = configPath
         self.weightsPath = weightsPath
         self.labelsPath = labelsPath
@@ -94,7 +95,7 @@ class Object_Detector(object):
         # print("names are " + str(names))
         return set(names)
 
-    def add_tags(self, tubes, step=7):
+    def add_tags(self, tubes, step=20):
 
         for tube in tubes:
             length = len(tube['color_tube'])

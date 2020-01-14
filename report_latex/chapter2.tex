@@ -1,60 +1,207 @@
-\chapter{Overview of Video Summarization}
+\chapter{Overview of CCTVVS}
+The fundamental idea is to generate a short summary which include all the
+important events\cite{oh2005video}, \cite{nam1999video}, \cite{li2001overview},
+\cite{Chu_2015_CVPR} to reduce the amount of manual effort and labour.
 
-After having gone through several important papers in this sector, we have narrowed down to follow the framework described in this section. It mainly has two phases: Real-Time Phase and Query Phase.
+After having gone through several important papers in this sector, the framework
+described in this section has been narrowed down to. It mainly has
+two phases: Real-Time Phase and Query Phase.
 
 
 \section{Real-time phase}
-The real-time phase reads the cctv footage, identifies clips of interest and performs certain image processing algorithms on the footage of interest to extract “flow-tubes” and tags from clips and stores them in a database. The phase is split into the following steps:
+The real-time phase reads the CCTV footage, identifies clips of interest and
+performs certain image processing algorithms on the footage of interest to
+extract “flow-tubes” and tags from clips and stores them in a
+database\cite{pritch2007webcam}. The phase is split into the following steps:
 
 \begin{enumerate}
     \item \textbf{Motion Detection}
 
-    Detect motion in the footage and identify any clips with significant motion while disregarding artefacts due to changing environmental conditions and other insignificant disturbances.
-    MOG is used in this step to see if there is any movement, and if there is significant foreground present in an image, decided by a static threshold, we consider the clip to have motion in it. MOG is specifically useful here due to its dynamic nature and adaptability to gradual changes in the environment very quickly and, additionally, availability of efficient parallel CUDA implementations of this very effective algorithm.
+    Detect motion in the footage and identify any clips with significant motion
+    while disregarding artifacts due to changing environmental conditions and
+    other insignificant disturbances.
+    \gls{mog} is used in this step to see if there is any movement, and if there is
+    significant foreground present in an image, decided by a static threshold,
+    the clip is considered to have motion in it. MOG is specifically useful here
+    due to its dynamic nature and adaptability to gradual changes in the
+    environment very quickly and, additionally, availability of efficient
+    implementations of this very effective algorithm.
 
     \item \textbf{Background Masking}
 
-	A foreground extractor like a Mixture of Gaussians is used to extract the subjects of interests in the clips identified by motion detection.
-    The same technique used in previous step is also employed here to generate foreground masks and thereby just extracting the foreground. Several techniques were experimented on and it turns MOG is the best cost effective and accurate technique available for our specific needs.
+    A foreground extractor like a Mixture of Gaussians~
+    \cite{zivkovic2004improved},~\cite{bouttefroy2010analysis},
+    ~\cite{sun2006background} is used to extract the subjects of interests in
+    the clips identified by motion detection. The same technique used in
+    previous step is also employed here to generate foreground masks and
+    thereby just extracting the foreground. Several techniques were
+    experimented on MOG is the most cost effective
+    and accurate technique available for this use case.
+
+    In Gaussian Mixture Model (GMM) defined as \ref{eqn:mog}, every pixel in the frame is modelled into
+    a Gaussian distribution. Probability of every pixel being the foreground or
+    background is calculated as:
+    \begin{equation}\label{eqn:mog}
+    P\left(X_{t}\right) =
+    \sum_{i=1}^{K} \omega_{i,t}.\eta(X_{t},\mu_{i,t},\Sigma_{i,t})
+    \end{equation}
+
+    \begin{itemize}
+        \item \(X_{t}\): current pixel in frame t
+        \item \(K\): the number of distributions in the mixture
+        \item \(\omega_{i,t}\): the weight of the \(k^{th}\) distribution in frame t
+        \item \(\mu_{i,t}\): the mean of the \(k^{th}\) distribution in frame t
+        \item \(\Sigma_{i,t}\): the standard deviation of the \(k^{th}\)
+        distribution in frame t
+    \end{itemize}
+
+    Where \(\eta(X_{t},\mu_{i,t},\Sigma_{i,t})\) is a probability density function
+    defined in \ref{eqn:pdf} as:
+    \begin{equation}\label{eqn:pdf}
+    \eta(X_{t},\mu,\Sigma) = \frac{1}{(2\pi)^{n/2}\Sigma^{1/2}}exp^{\frac{-1}{2}(X_t-\mu)\Sigma^{-1}(X_{t}-\mu)}
+    \end{equation}
+
 
     \item \textbf{Computation of Objects flow-tubes}
 
 	Flow-tubes are computed from the extracted foreground in previous phase.
-    Flow tubes are extracted by performing morphological operations and several redundant foreground blobs are removed in this step. Furthermore, individual subjects present in each frame are identified, and related back with the subjects present in the previous frame, thereby producing flow-tube arrays.
+    Flow tubes are extracted by performing morphological operations and several
+    redundant foreground blobs are removed in this step. Furthermore, individual
+    subjects present in each frame are identified, and related back with the
+    subjects present in the previous frame, thereby producing flow-tube arrays.
 
     \item \textbf{Object Tagging}
 
-	After actual subjects are identified in the previous phase, the subjects are classified into several popular categories using a popular deep-learning model called “You Only Look Once” model, and these tags are computed.
-	We use a pre-trained 26-layered YOLOv3 model as the most common categories present in a common CCTV video footage are already present in the set of categories identifiable on a YOLOv3 trained on the standard COCO dataset.
+    After actual subjects are identified in the previous phase, the subjects are
+    classified into several popular categories using a popular deep-learning
+    model called “You Only Look Once” model, and these tags are computed.
+
+    A pre-trained 26-layered YOLOv3 model is used as the most common categories
+    present in a common CCTV video footage are already present in the set of
+    categories identifiable on a YOLOv3 trained on the standard COCO dataset.
 
     \item \textbf{Metadata storage}
 
-    In this stage, a connection is established to the database and the tags and flow-tubes computed are stored into the database.
+    In this stage, a connection is established to the database and the tags and
+    flow-tubes computed are stored into the database.
 \end{enumerate}
 
 \section{Query Phase}
 
-The query phase processes the user input query, extracts the relevant tubes and generates a relevant summary. This phase is split into the following steps:
+The query phase processes the user input query, extracts the relevant tubes and
+generates a relevant summary. This phase is split into the following steps:
 
 \begin{itemize}
 
     \item \textbf{Tube Selection}
 
-    The user query containing various parameters such as time period, tags and length of summary required are taken from user and relevant flow-tubes are selected from the database.
-    This stage is easily implemented by writing logic to create a query with all the parameters the user specifies in the input query.
+    The user query containing various parameters such as time period, tags and
+    length of summary required are taken from user and relevant flow-tubes are
+    selected from the database.
+
+    This stage is easily implemented by writing logic to create a query with
+    all the parameters the user specifies in the input query.
 
     \item \textbf{Rearrangement}
-    An optimisation algorithm, in our case simulated annealing, is used to rearrange the flow-tubes in the time dimension to produce a summary of the desired length.
+    An optimisation algorithm, in this case simulated annealing
+    \cite{yao1995new}, is used to rearrange the flow-tubes in the time
+    dimension to produce a summary of the desired length.
 
-    While there are several heuristic based search algorithms are recommended for these purposes by different authors, simulated annealing remains to be the most successful and most popularly cited method. Hence, we have implemented simulated annealing with a custom cost function based on our needs.
+    While there are several heuristic based search algorithms are recommended
+    for these purposes by different authors, simulated annealing remains to be
+    the most successful and most popularly cited method. Hence, simulated
+    annealing with a custom cost function has been implemented based on the
+    needs.
+
+    \subsection{Cost Function}
+    The heart of the project resides in the rearrangement phase. A heuristic
+    based approach has been adopted to solve this NP combinatorial problem.
+    In order to solve a combinatorial problem using an algorithm like simulated
+    annealing\cite{yao1995new}, an Energy or a Cost function has to be defined,
+    which embodies the various parameters to be optimised. In this case, the
+    two main parameters to optimise are:
+    \begin{itemize}
+        \item Collision: The amount of collision between events in the rearranged
+        set of events.
+        \item Length: The total length of the generated summary must be as small
+        as possible.
+    \end{itemize}
+    \textbf{Collision Cost} is calculated as:
+
+    \begin{equation}\label{eqn:collcost}
+    Cost_{Collision} = \frac{Collision}{TotalPixels - Collision}
+    \end{equation}
+
+    where,
+
+    \begin{equation}\label{eqn:coll}
+    Collision = \sum_{i=0}^{N}\sum_{j=i}^{N} \left(\sum_{k=\max(s_{i},s_{j})}^{\min(e_{i}, e_{j})}T_{i}[k].T_{j}[k]\right)
+    \end{equation}
+
+    \begin{equation}\label{eqn:totalp}
+    TotalPixels = \sum_{i=0}^{N}\sum_{j=i}^{N} \left(
+        \sum_{k=\max(s_{i},s_{j})}^{\min(end_{i}, end_{j})}
+        \sum \left(T_{i}[k==w] + \sum T_{j}[k==w]\right) \right)
+    \end{equation}
+
+    \(e_{i}\): the time at which the clip \textit{i} ends\\
+    \(s_{i}\): the time at which the clip \textit{i} ends\\
+    \(T_{i}\): the 3D array (tube) representing the event in a boolean map format\\
+    \(w\): the value of all foreground pixels in the \(T_{i}\)\\
+
+    \textbf{Length Cost} is calculated as:
+    \begin{equation} \label{eqn:costlen}
+    Cost_{length} = \frac{ Length - Lowerlimit}{ Upperlimit - Lowerlimit}
+    \end{equation}
+    where
+    \begin{equation} \label{eqn:len}
+    Length = \max_{\forall i \in \tau}(end_{i}) - \min_{\forall i \in \tau}(s_{i})
+    \end{equation}
+    \begin{equation} \label{eqn:lowerlim}
+    Lowerlimit = \max_{\forall i \in \tau}len_{i}
+    \end{equation}
+    \begin{equation} \label{eqn:upperlim}
+    Upperlimit = \sum_{i}^{N}end_{i}
+    \end{equation}
+    \(end_{i}\): the time at which the clip \textit{i} ends\\
+    \(s_{i}\): the time at which the clip \textit{i} ends\\
+
+    The total cost is given as:
+    \begin{equation} \label{eqn:totalCost}
+    TotalCost(W, Cost) = sigmoid(W.Cost^{T})
+    \end{equation}
+    where,
+    \begin{itemize}
+        \item \(W\) is weight vector of the form \([ Weight_{Collision}, Weight_{Length} ]\) assigning different priorities for the two factors
+        \item \(Cost\) is Cost vector of the form \([ Cost_{Collision}, Cost_{Length} ]\)
+        \item \(sigmoid\) is defined as - \\
+        \center {
+            \begin{equation} \label{eqn:sigm}
+                sigmoid(x) = \frac{1}{1+e^{-x}}
+        \end{equation}
+        }
+
+    \end{itemize}
+
 
     \item \textbf{Time-lapsed background generation}
-    In this step a background is generated based on the time period and summary length required by user.
-    A weighted approach, with the periods where there is most activity, is considered more heavily in generating the time-lapsed background.
+    In this step a background is generated based on the time period and summary
+    length required by user. \\
+
+    A weighted approach, with the periods where there is most activity, is
+    considered more heavily in generating the time-lapsed background.
 
     \item \textbf{Blending}
-    Poisson blending is used to blend the rearranged flow-tubes with the time-lapsed background to generate the summary we require. This summary is then saved onto the user’s computer.
+    Poisson blending\cite{szeliski2011fast},\cite{Perez:2003:PIE:1201775.882269}
+    is used to blend the rearranged flow-tubes with the time-lapsed background
+    to generate the summary video. This summary is then saved onto the
+    user’s computer.
 \end{itemize}
 
 \section{Summary}
-In this chapter, we have given an overview of how our solution to the problem statement of summarizing CCTV video footage is structured. However there is no strict constraints on following the above prescribed framework for solving this problem. In our view, this structure optimizes the amount of time required to generate summaries and also help in rapid prototyping and validating of various techniques/models during the course of developing the application.
+This chapter gives an overview of how this solution to the problem
+statement of summarizing CCTV video footage is structured. However there is no
+strict constraints on following the above prescribed framework for solving this
+problem. This structure optimizes the amount of time required to
+generate summaries and also help in rapid prototyping and validating of various
+techniques/models during the course of developing the application.

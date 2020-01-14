@@ -93,9 +93,10 @@ def intersecting_regions(cur_img, cur_count, prev_img, prev_labels,
 
 def label_tubes(video_mask):
     """
-    Detects and labels the tubes in the masked video
+    Detects and labels the tubes aka events in the masked video
 
-    Args: masked_video
+    Args:
+        video_mask: a list of frames (single channel)
 
     Returns: labelled video
     """
@@ -243,7 +244,7 @@ def extract_tubes(labelled_volume):
         tube = []   # tube of current object
         # labelled_vol_copy = labelled_volume.copy()
         label = uniq[i] # current label
-        
+
         start=False
         start_frame = 0
         end_frame = len(labelled_volume)
@@ -262,7 +263,7 @@ def extract_tubes(labelled_volume):
                 frame_copy[frame_copy!=255] = 0
                 frame_copy = frame_copy.astype(np.uint8)  # make sure type is uint8
                 tube.append(frame_copy)
-        
+
         # end_frame = start_frame + len(tube)
         tubeStruc = {"start":start_frame, "end":end_frame, "tube":tube}
         tubes.append(tubeStruc)
@@ -288,7 +289,7 @@ def create_object_tubes(video, tubes):
         print("length: "+str(tubes[i]['end']-tubes[i]['start']))
         print(len(tube))
         for j in range(0, len(tube)):
-            
+
             active_pixels = int(np.sum(tube[j])/255)
 
             # only consider frames with events/activity
@@ -306,8 +307,5 @@ def create_object_tubes(video, tubes):
         # color_tubes.append(color_tube)
         # masked_tubes.append(masked_tube)
         tubes[i]["color_tube"] = color_tube
-
-        print("color shape: " + str(np.shape(color_tube)))
-        print("mask shape: " + str(np.shape(masked_tube)))
 
     return tubes

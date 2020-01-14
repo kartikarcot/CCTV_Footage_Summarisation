@@ -1,62 +1,121 @@
-\chapter{Software Requirement Specification}
+\chapter{Software Requirement Specification of CCTVVS}
 
-Software Requirements Specification is detail description of system behavior that is constructed. It integrates the functional and nonfunctional requirements for software to be constructed. The functional requirements describe what exactly the software must do and the non-functional requirement includes the constraint on the design or implementation of the system. A function is described as a set of inputs, the behavior, and outputs. A non-functional requirement is a requirement that specifies criteria that can be used to judge the operation of a system, rather than specific behaviors.
+Software Requirements Specification is detail description of system behavior
+that is constructed. It integrates the functional and nonfunctional requirements
+for software to be constructed. The functional requirements describe what
+exactly the software must do and the non-functional requirement includes the
+constraint on the design or implementation of the system. A function is
+described as a set of inputs, the behavior, and outputs. A non-functional
+requirement is a requirement that specifies criteria that can be used to judge
+the operation of a system, rather than specific behaviors.
 
 \section{Overall Description}
 
-This section describes the general factors which affects system and the requirements. The software developed should provide means to configure order assignment, generate master files with required restrictions and must handle concurrent assignment of orders to reconciliation specialists. This section also deals with user characteristics, constraints on using the system and dependencies of the system on other applications.
+This section describes the general factors which affects system and the
+requirements. The software developed should provide means to configure order
+assignment, generate master files with required restrictions and must handle
+concurrent assignment of orders to reconciliation specialists. This section
+also deals with user characteristics, constraints on using the system and
+dependencies of the system on other applications.
 
     \subsection{Product Perspective}
-    The system should be versatile and easy to use. It should be flexible and the response time should be quick. The system is composed of several modules performing different tasks and they must be well co-ordinated. The system developed should be easy to deploy and maintain. The intended end users for this are mostly CCTV operators and security managers. The system must be self-explanatory as it will be used by laymen or people with minimum technical experience.
+    The system should be versatile and easy to use. It should be flexible and
+    the response time should be quick. The system is composed of several modules
+    performing different tasks and they must be well co-ordinated. The system
+    developed should be easy to deploy and maintain. The intended end users for
+    this are mostly CCTV operators and security managers. The system must be
+    self-explanatory as it will be used by laymen or people with minimum
+    technical experience.
 
     \subsection{Product Functions}
-    The sole purpose of the product is to generate semantic, concise and relevant summaries for the specified time periods. The product must be versatile enough to handle sophisticated queries which considers several parameters like type of subjects, time period, summary length, degree of importance of events, duration of events to be considered etc.
+    The sole purpose of the product is to generate semantic, concise and
+    relevant summaries for the specified time periods. The product must be
+    versatile enough to handle sophisticated queries which considers several
+    parameters like type of subjects, time period, summary length, degree of
+    importance of events, duration of events to be considered etc.
 
     \subsection{User Characteristics}
-    The end users of the system are mostly of to two roles, CCTV operators and security managers. Since they are not technical specialists, the user interface is expected to be simple and easy to use. We can assume that the general user of this application is versed in form-based inputs and has a grasp on basic English to use the interface accordingly. We are also assuming that the can make all kinds of queries, both valid and invalid, and it is upto to the software to validate the queries and provide responsive feedback accordingly.
+    The end users of the system are mostly of to two roles, CCTV operators and
+    security managers. Since they are not technical specialists, the user
+    interface is expected to be simple and easy to use. It can be assumed that
+    the general user of this application is versed in form-based inputs and has
+    a grasp on basic English to use the interface accordingly. It is also
+    assumed that the user can make all kinds of queries, both valid and invalid,
+    and it is up to to the software to validate the queries and provide
+    responsive feedback accordingly.
 
     \subsection{Constraints and Dependencies}
     The dependencies and constraints that the project has are:
     \begin{itemize}
-        \item The first major constraint is the memory constraint. The number of flow-tubes it can hold in memory is directly proportional to the amount of events which can be optimized at a time.
-        \item The system is highly dependent on having accurately tuned hyperparameters, whether it be the threshold for motion detection or the learning (exploration/exploitation) rate used in the optimization technique, must be tuned specifically for each use-case.
-        \item The number of categories it can recognize in a video is constrained on the diverseness of the dataset used to train the deep learning model used.
-        \item A major dependency of the project is the OpenCV parallel implementation of several advanced algorithms like MOG and Poisson Blending.
+        \item The first major constraint is the memory constraint. The number
+        of flow-tubes it can hold in memory is directly proportional to the
+        amount of events which can be optimized at a time.
+        \item The system is highly dependent on having accurately tuned
+        hyper-parameters, whether it be the threshold for motion detection or
+        the learning (exploration/exploitation) rate used in the optimization
+        technique, must be tuned specifically for each use-case.
+        \item The number of categories it can recognize in a video is
+        constrained on the diverseness of the dataset used to train the
+        deep learning model used.
+        \item A major dependency of the project is the \gls{openCV} parallel
+        implementation of several advanced algorithms like MOG and Poisson
+        Blending.
     \end{itemize}
 
 \section{Specific Requirements}
 
-This section covers all software requirements with sufficient details to be made use of by the designers to build a system to satisfy requirements. The product perspective and user characteristics do not state the actual requirements needed that the system but rather state how the product should work with respect to user convenience. The specific requirements are actual data with which the customer and software provider can agree. The final system is expected to satisfy all the requirements mentioned here.
+This section covers all software requirements with sufficient details to be made
+use of by the designers to build a system to satisfy requirements. The product
+perspective and user characteristics do not state the actual requirements needed
+that the system but rather state how the product should work with respect to
+user convenience. The specific requirements are actual data with which the
+customer and software provider can agree. The final system is expected to
+satisfy all the requirements mentioned here.
 
     \subsection{Functional Requirements}
     The functional requirements of the system are:
     \begin{itemize}
-        \item The system must automatically validate user queries before processing them
-        \item The system must produce video summaries based on the user query given
-        \item The system must label each event shown in summary with relevant time stamps
+        \item The system must automatically validate user queries before
+        processing them
+        \item The system must produce video summaries based on the user query
+        given
+        \item The system must label each event shown in summary with relevant
+        time stamps
         \item The system must be able to identify and tag events in real-time
-        \item The system must be able to merge and rearrange events without losing meaning
-        \item The system must be able to seamlessly blend subjects with generated time-lapsed background
-        \item The system must be able to generate a relevant background based on the density of events distributed across the queried period of time
-        \item The system must be able to generate summaries not longer than ten percent of the queried period length
-        \item The user query form must be versatile enough to encompass all forms of relevant queries
-        \item The system must have a feature to manually tune the various possible hyper-parameters from the user-interface
+        \item The system must be able to merge and rearrange events without
+        losing meaning
+        \item The system must be able to seamlessly blend subjects with
+        generated time-lapsed background
+        \item The system must be able to generate a relevant background based on
+        the density of events distributed across the queried period of time
+        \item The system must be able to generate summaries not longer than ten
+        percent of the queried period length
+        \item The user query form must be versatile enough to encompass all
+        forms of relevant queries
+        \item The system must have a feature to manually tune the various
+        possible hyper-parameters from the user interface
     \end{itemize}
 
     \subsection{Performance Requirements}
     Performance requirements for the system include the following:
     \begin{itemize}
-        \item The system should be able to transmit the video feed with minimal loss of packets
+        \item The system should be able to transmit the video feed with minimal
+        loss of packets
         \item The delay with respect to the video transmission should be minimal
         \item The control signal should be transmitted at real time
         \item The obstacle detection should happen in real time
     \end{itemize}
 
     \subsection{Supportability}
-    The UI will be web-based and hence can be used on any system. While the system is built on python and open-source tools which are ubiquitous in modern day PCs, however we recommend those computers with large amount of RAM for fast performance, as the algorithm developed for optimization requires the system to hold significantly large arrays in memory.
+    The UI will be web-based and hence can be used on any system. While the
+    system is built on python and open-source tools which are ubiquitous in
+    modern day PCs, however it is recommended to use computers with large amount
+    of RAM for fast performance, as the algorithm developed for optimization
+    requires the system to hold significantly large arrays in memory.
 
     \subsection{Software Requirements}
-    The different software requirements required by the application are as follows:
+    The different software requirements required by the application are as
+    follows:
     \begin{itemize}
         \item Operating System:
         \begin{itemize}
@@ -66,7 +125,7 @@ This section covers all software requirements with sufficient details to be made
         \end{itemize}
         \item Platform: Python Virtual Environment
         \item Language: Python
-        \item Interface: Python \gls{gui}
+        \item Interface: Python GUI
         \item IDE/tool:
         \begin{itemize}
             \item Visual Studio Code
@@ -80,7 +139,8 @@ This section covers all software requirements with sufficient details to be made
     \begin{itemize}
         \item Platform/CPU
         \begin{itemize}
-            \item Modern multi-core processor (Ex: Intel Core i7 6700HQ) on x86/ARM platform
+            \item Modern multi-core processor (Ex: Intel Core i7 6700HQ) on
+            x86/ARM platform
         \end{itemize}
         \item Memory
         \begin{itemize}
@@ -89,17 +149,26 @@ This section covers all software requirements with sufficient details to be made
         \end{itemize}
         \item Storage
         \begin{itemize}
-            \item 64GB or higher for storing an entire day of video (depending on video resolution)
+            \item 64GB or higher for storing an entire day of video (depending
+            on video resolution)
         \end{itemize}
     \end{itemize}
 
     \subsection{Design Constraints}
-    The system is designed to be versatile and flexible. The design constraints include a user friendly interface. It should be able to handle requests in short time periods. The system must ensure that database is always in a consistent state. Also, the system must be built to handle all possible inputs so as to make the feature comprehensive enough for non-technical end users. The system must be able to validate input queries.
+    The system is designed to be versatile and flexible. The design constraints
+    include a user friendly interface. It should be able to handle requests in
+    short time periods. The system must ensure that database is always in a
+    consistent state. Also, the system must be built to handle all possible
+    inputs so as to make the feature comprehensive enough for non-technical
+    end users. The system must be able to validate input queries.
 
     \subsection{Interfaces}
-    This section describes the interfaces in detail. The two types of interfaces involved are User Interfaces and Software Interfaces.
+    This section describes the interfaces in detail. The two types of
+    interfaces involved are User Interfaces and Software Interfaces.
         \subsubsection{User Interfaces of the system}
-        There is a single user interface from which the software accept parameters from the user and downloads the summary created. It must be form based and have the following parameters:
+        There is a single user interface from which the software accept
+        parameters from the user and downloads the summary created. It must be
+        form based and have the following parameters:
         \begin{itemize}
             \item Input source \& output file path
             \item Time period
@@ -112,22 +181,36 @@ This section covers all software requirements with sufficient details to be made
         \subsubsection{Software Interfaces of the system}
         The following software interfaces are implemented in the application:
         \begin{itemize}
-            \item The different modules developed in the system uses standard pre-defined data structures as interfaces between each other.
-            \item Each module is developed as objects hence, the data internally is exposed by helper functions.
+            \item The different modules developed in the system uses standard
+            pre-defined data structures as interfaces between each other.
+            \item Each module is developed as objects hence, the data
+            internally is exposed by helper functions.
         \end{itemize}
 
 
     \subsection{Non-Functional Requirements}
-    These are the requirements that specify criteria that can be used to judge or evaluate the operation of the system rather than specific behavior and are not directly concerned with the specific functions delivered by the system.
+    These are the requirements that specify criteria that can be used to judge
+    or evaluate the operation of the system rather than specific behavior and
+    are not directly concerned with the specific functions delivered by the system.
 
     \begin{itemize}
-        \item Efficiency: The system shall perform at best possible efficiency in all internal operations.
-        \item Availability: The system must be up and running at all times and must accommodate users
+        \item Efficiency: The system shall perform at best possible efficiency
+        in all internal operations.
+        \item Availability: The system must be up and running at all times and
+        must accommodate users
         \item Security: The system must be well built with no security threats.
-        \item Uniformity: The system must perform on any standard browser and any OS in the same way, while producing fairly similar summaries each time a similar query is made.
-        \item Speed: The system must have a short latency period and must be responsive
+        \item Uniformity: The system must perform on any standard browser and
+        any OS in the same way, while producing fairly similar summaries each
+        time a similar query is made.
+        \item Speed: The system must have a short latency period and must be
+        responsive
     \end{itemize}
 
 \section{Summary}
 
-The specific requirements and constraints that must be kept in mind while building the application have been detailed in this chapter. These include the hardware requirements, software requirements and functional requirements for automation of reconciliation. Also, this chapter cites the various assumptions being made by the developer of the system for auto assignment of orders.  All these have to be managed while building and running the system.
+The specific requirements and constraints that must be kept in mind while
+building the application have been detailed in this chapter. These include the
+hardware requirements, software requirements and functional requirements for
+automation of reconciliation. Also, this chapter cites the various assumptions
+being made by the developer of the system for auto assignment of orders.  All
+these have to be managed while building and running the system.
